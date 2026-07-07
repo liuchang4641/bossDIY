@@ -1,0 +1,3023 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boss 参数编辑器</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #1a1a2e;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #16213e;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
+        }
+        h1 { text-align: center; color: #ffd966; margin-bottom: 20px; font-size: 2.2rem; font-weight: 700; }
+        .section { background: #0f3460; border-radius: 8px; padding: 16px; margin-bottom: 20px; border-left: 4px solid #e67e22; }
+        .section-title { font-weight: 700; font-size: 1.3rem; color: #ffd966; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; align-items: center; }
+        .row .field-group {
+            flex: 0 0 calc(25% - 12px);
+            min-width: 150px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .row .field-group label {
+            font-weight: 600;
+            color: #bbb;
+            white-space: nowrap;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .row .field-group input,
+        .row .field-group select {
+            flex: 1;
+            background: #1a1a2e;
+            border: 1px solid #4a4a6a;
+            border-radius: 6px;
+            padding: 8px 10px;
+            color: #fff;
+            font-size: 0.95rem;
+            appearance: none;
+            min-width: 0;
+            font-weight: 500;
+        }
+        .row .field-group input[type="number"]::-webkit-inner-spin-button,
+        .row .field-group input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .row .field-group input.small-input { width: 60px; flex: 0 0 auto; }
+        .row .field-group input.medium-input { width: 90px; flex: 0 0 auto; }
+
+        .btn {
+            background: #e67e22;
+            border: none;
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+        .btn:hover { background: #cf711d; }
+        .btn-danger { background: #c0392b; }
+        .btn-danger:hover { background: #a93226; }
+        .btn-sm { padding: 4px 12px; font-size: 0.85rem; }
+        .btn-success { background: #27ae60; }
+        .btn-success:hover { background: #1e8449; }
+        .btn-secondary { background: #5d6d7e; }
+        .btn-secondary:hover { background: #4a5a6a; }
+
+        .card {
+            background: #1a1a2e;
+            border: 1px solid #3a3a5a;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0f3460;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: default;
+            user-select: none;
+        }
+        .card-header .title { font-weight: 700; color: #ffd966; font-size: 1.1rem; }
+        .card-body { padding-top: 12px; display: block; }
+        .card-body.collapsed { display: none; }
+
+        .fold-group {
+            border: 1px solid #2a3a5a;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            background: #0f1a2e;
+        }
+        .fold-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 12px;
+            background: #1a2a4a;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            user-select: none;
+        }
+        .fold-header:hover { background: #2a3a5a; }
+        .fold-header .label { font-weight: 700; color: #8ab4f8; font-size: 1rem; }
+        .fold-body { padding: 10px; display: block; }
+        .fold-body.collapsed { display: none; }
+
+        .list-item {
+            background: #16213e;
+            border: 1px solid #2a3a5a;
+            border-radius: 6px;
+            padding: 14px 10px;
+            margin-bottom: 12px;
+            position: relative;
+            line-height: 1.8;
+        }
+        .list-item .remove-btn {
+            position: absolute; top: 4px; right: 4px; background: #c0392b; border: none; color: white;
+            border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-size: 16px; line-height: 26px; text-align: center;
+            font-weight: 700;
+        }
+        .list-item .remove-btn:hover { background: #e74c3c; }
+
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 16px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .flex-row .field-group {
+            flex: 0 0 calc(25% - 16px);
+            min-width: 140px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .flex-row .field-group label {
+            font-size: 0.9rem;
+            color: #aaa;
+            white-space: nowrap;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+        .flex-row .field-group input,
+        .flex-row .field-group select {
+            flex: 1;
+            background: #1a1a2e;
+            border: 1px solid #3a4a5a;
+            border-radius: 4px;
+            padding: 6px 8px;
+            color: #fff;
+            font-size: 0.9rem;
+            appearance: none;
+            min-width: 0;
+            font-weight: 500;
+        }
+        .flex-row .field-group input[type="number"]::-webkit-inner-spin-button,
+        .flex-row .field-group input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .flex-row .field-group input.small-input { width: 60px; flex: 0 0 auto; }
+        .flex-row .field-group input.medium-input { width: 100px; flex: 0 0 auto; }
+        .flex-row.three-col .field-group {
+            flex: 0 0 calc(33.33% - 16px);
+        }
+
+        /* ----- 自定义枚举下拉框 (统一组件) ----- */
+        .enum-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .enum-wrapper .enum-input {
+            flex: 1;
+            background: #1a1a2e;
+            border: 1px solid #4a4a6a;
+            border-radius: 6px;
+            padding: 8px 10px;
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 500;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .enum-wrapper .enum-input:focus {
+            border-color: #e67e22;
+        }
+        .enum-wrapper .enum-help-btn {
+            background: #3a4a6a;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 24px;
+            text-align: center;
+            flex-shrink: 0;
+            transition: 0.2s;
+        }
+        .enum-wrapper .enum-help-btn:hover {
+            background: #e67e22;
+        }
+        .enum-wrapper .enum-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: auto;
+            z-index: 9999;
+            background: #1a1a2e;
+            border: 1px solid #4a4a6a;
+            border-radius: 6px;
+            max-height: 420px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+            display: none;
+            margin-top: 2px;
+            min-width: 300px;
+            width: auto;
+            max-width: 90vw;
+        }
+        .enum-wrapper .enum-dropdown.open { display: block; }
+        .enum-wrapper .enum-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            color: #d0d0d0;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-bottom: 1px solid #2a3a5a;
+            transition: background 0.15s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .enum-wrapper .enum-option:last-child { border-bottom: none; }
+        .enum-wrapper .enum-option:hover { background: #2a3a5a; color: #fff; }
+        .enum-wrapper .enum-option.selected { background: #0f3460; color: #ffd966; }
+        .enum-wrapper .enum-option.unmatched { opacity: 0.65; }
+        .enum-wrapper .enum-dropdown::-webkit-scrollbar { width: 6px; }
+        .enum-wrapper .enum-dropdown::-webkit-scrollbar-track { background: #0a0a1a; border-radius: 3px; }
+        .enum-wrapper .enum-dropdown::-webkit-scrollbar-thumb { background: #4a4a6a; border-radius: 3px; }
+        .enum-wrapper .enum-dropdown::-webkit-scrollbar-thumb:hover { background: #5a5a7a; }
+        .enum-wrapper .enum-dropdown .enum-empty {
+            padding: 12px;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* action 块中的适配 */
+        .action-row .field-group .enum-wrapper .enum-input {
+            padding: 5px 6px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+        }
+        .action-row .field-group .enum-wrapper .enum-dropdown {
+            max-height: 360px;
+            min-width: 260px;
+        }
+        .action-row .field-group .enum-wrapper .enum-option {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
+        /* 帮助模态框 */
+        .help-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .help-modal-overlay.active { display: flex; }
+        .help-modal {
+            background: #1a1a2e;
+            border: 2px solid #e67e22;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 40px rgba(230,126,34,0.3);
+        }
+        .help-modal h3 {
+            color: #ffd966;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+        .help-modal .help-content {
+            color: #d0d0d0;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .help-modal .help-close {
+            margin-top: 16px;
+            background: #e67e22;
+            border: none;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            float: right;
+        }
+
+        /* 其他原有样式 */
+        .action-block {
+            border: 1px solid #2a3a5a;
+            border-radius: 6px;
+            padding: 12px 10px;
+            margin-bottom: 12px;
+            background: #0a1a2a;
+            position: relative;
+            line-height: 1.8;
+        }
+        .action-block .remove-btn {
+            position: absolute; top: 4px; right: 4px; background: #c0392b; border: none; color: white;
+            border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-size: 16px; line-height: 26px; text-align: center;
+            font-weight: 700;
+            z-index: 2;
+        }
+        .action-block .remove-btn:hover { background: #e74c3c; }
+        .action-shorttext {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .action-shorttext label {
+            font-size: 0.9rem;
+            color: #aaa;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+        .action-shorttext input {
+            flex: 1;
+            background: #1a1a2e;
+            border: 1px solid #3a4a5a;
+            border-radius: 4px;
+            padding: 6px 10px;
+            color: #fff;
+            font-size: 0.9rem;
+            appearance: none;
+            min-width: 100px;
+            font-weight: 500;
+        }
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .action-row .field-group {
+            flex: 0 0 calc(33.33% - 12px);
+            min-width: 110px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .action-row .field-group label {
+            font-size: 0.8rem;
+            color: #8a9aaa;
+            white-space: nowrap;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+        .action-row .field-group input,
+        .action-row .field-group select {
+            flex: 1;
+            background: #1a1a2e;
+            border: 1px solid #3a4a5a;
+            border-radius: 4px;
+            padding: 5px 6px;
+            color: #fff;
+            font-size: 0.8rem;
+            appearance: none;
+            min-width: 40px;
+            font-weight: 500;
+        }
+        .action-row .field-group input[type="number"]::-webkit-inner-spin-button,
+        .action-row .field-group input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .action-row .field-group input.small { width: 55px; flex: 0 0 auto; }
+        .action-row .field-group input.medium { width: 90px; flex: 0 0 auto; }
+
+        /* 条件参数拆分输入框 */
+        .cond-parts-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+            align-items: center;
+            flex: 1;
+            background: #0f1a2e;
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid #2a3a5a;
+        }
+        .cond-parts-container .cond-part {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #1a1a2e;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .cond-parts-container .cond-part label {
+            font-size: 0.7rem;
+            color: #8a9aaa;
+            white-space: nowrap;
+        }
+        .cond-parts-container .cond-part input {
+            width: 60px;
+            background: #1a1a2e;
+            border: 1px solid #3a4a5a;
+            border-radius: 3px;
+            padding: 2px 4px;
+            color: #fff;
+            font-size: 0.8rem;
+            appearance: none;
+            font-weight: 500;
+        }
+        .cond-parts-container .cond-part input[type="number"]::-webkit-inner-spin-button,
+        .cond-parts-container .cond-part input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .cond-parts-container .cond-part input.short { width: 40px; }
+        .cond-parts-container .cond-part input.medium { width: 60px; }
+        .cond-parts-container .cond-part input.long { width: 80px; }
+
+        /* 狂暴数据样式 */
+        .rage-entry {
+            background: #0a1a2a;
+            border: 1px solid #2a3a5a;
+            border-radius: 6px;
+            padding: 12px 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .rage-entry .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #c0392b;
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 26px;
+            text-align: center;
+            font-weight: 700;
+            z-index: 2;
+        }
+        .rage-entry .remove-btn:hover { background: #e74c3c; }
+        .rage-entry .field-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 0 0 calc(33.33% - 10px);
+            min-width: 120px;
+        }
+        .rage-entry .field-group label {
+            font-size: 0.8rem;
+            color: #8a9aaa;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .rage-entry .field-group input {
+            flex: 1;
+            background: #1a1a2e;
+            border: 1px solid #3a4a5a;
+            border-radius: 4px;
+            padding: 4px 6px;
+            color: #fff;
+            font-size: 0.8rem;
+            appearance: none;
+            min-width: 40px;
+            font-weight: 500;
+        }
+        .rage-entry .field-group .rage-help-btn {
+            background: #3a4a6a;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 20px;
+            text-align: center;
+            flex-shrink: 0;
+            transition: 0.2s;
+        }
+        .rage-entry .field-group .rage-help-btn:hover {
+            background: #e67e22;
+        }
+
+        #outputArea {
+            background: #0a0a1a;
+            border: 1px solid #4a4a6a;
+            border-radius: 6px;
+            padding: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 0.85rem;
+            max-height: 400px;
+            overflow: auto;
+            color: #aaccff;
+            margin-top: 10px;
+        }
+        .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+        .tab-bar button {
+            background: #0f3460;
+            border: none;
+            color: #aaa;
+            padding: 8px 16px;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .tab-bar button.active { background: #e67e22; color: #fff; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .mt-10 { margin-top: 10px; }
+        .mb-10 { margin-bottom: 10px; }
+        .flex { display: flex; gap: 10px; flex-wrap: wrap; }
+        .text-muted { color: #888; font-size: 0.85rem; }
+        .armor-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 8px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .armor-row .armor-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .armor-row .armor-item label {
+            font-size: 0.85rem;
+            color: #888;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+        .armor-row .armor-item input {
+            width: 50px;
+            flex: 0 0 auto;
+            background: #1a1a2e;
+            border: 1px solid #4a4a6a;
+            border-radius: 4px;
+            padding: 4px 4px;
+            color: #fff;
+            font-size: 0.85rem;
+            appearance: none;
+            font-weight: 500;
+        }
+        .armor-row .armor-item input[type="number"]::-webkit-inner-spin-button,
+        .armor-row .armor-item input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .placeholder-text { color: #666; font-style: italic; }
+        .ai-divider { border-top: 1px dashed #3a4a5a; margin: 8px 0; }
+        .ai-hint { color: #888; font-size: 0.85rem; font-style: italic; }
+        .ai-auto-fold {
+            border: 1px solid #2a3a5a;
+            border-radius: 4px;
+            margin-top: 6px;
+            background: #0a1525;
+        }
+        .ai-auto-fold .fold-header {
+            padding: 4px 10px;
+            background: #1a2a4a;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .ai-auto-fold .fold-header:hover { background: #2a3a5a; }
+        .ai-auto-fold .fold-header .label { font-size: 0.85rem; color: #8ab4f8; font-weight: 600; }
+        .ai-auto-fold .fold-body { padding: 8px 10px; display: block; }
+        .ai-auto-fold .fold-body.collapsed { display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>⚔️ Boss 参数编辑器 (torial.json)</h1>
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="boss">Boss 信息</button>
+        <button class="tab-btn" data-tab="enemies">敌人列表</button>
+        <button class="tab-btn" data-tab="export">导出 / 导入</button>
+    </div>
+
+    <div id="tab-boss" class="tab-content active">
+        <div class="section">
+            <div class="section-title">Boss 基础信息</div>
+            <div class="row">
+                <div class="field-group"><label>关卡ID</label><input type="number" id="stageId" value="2005" /></div>
+                <div class="field-group"><label>关卡名</label><input type="text" id="stagename" value="第5回トライアルイベント" /></div>
+                <div class="field-group"><label>事件ID</label><input type="number" id="eventid" value="10" /></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-enemies" class="tab-content">
+        <div class="section">
+            <div class="section-title"><span>敌人列表</span><button class="btn btn-success" id="addEnemyBtn">+ 添加敌人</button></div>
+            <div id="enemyList"></div>
+        </div>
+    </div>
+
+    <div id="tab-export" class="tab-content">
+        <div class="section">
+            <div class="section-title">导出 / 导入</div>
+            <div class="flex">
+                <button class="btn" id="exportBtn">📥 导出 JSON</button>
+                <button class="btn btn-secondary" id="importBtn">📤 导入 JSON</button>
+                <input type="file" id="fileInput" accept=".json" style="display:none;" />
+                <button class="btn btn-danger" id="clearAllBtn">🗑️ 清空所有</button>
+            </div>
+            <div id="outputArea" contenteditable="false"></div>
+        </div>
+    </div>
+    <div style="text-align:center; margin-top:20px; color:#888; font-size:0.85rem;">编辑器 v1.0 — 点击导出即可下载 JSON 文件</div>
+</div>
+
+<!-- 帮助信息模态框 -->
+<div class="help-modal-overlay" id="helpModal">
+    <div class="help-modal">
+        <h3 id="helpTitle">详细说明</h3>
+        <div class="help-content" id="helpContent"></div>
+        <button class="help-close" id="helpClose">关闭</button>
+    </div>
+</div>
+
+<script>
+// ============= 1. 定义枚举显示名 =============
+const ActionTypeOnly = {
+    0: '无动作',
+    101: '攻击',
+    102: '多段攻击',
+    103: '自扣血',
+    301: 'hp回复',
+    311: '',
+    321: '增加强击印记',
+    401: '吸血',
+    501: '解除强化buff',
+    502: '解除debuff',
+    601: '苏生',
+    701: '充能',
+    801: '根性'
+};
+const BuffTypeOnly = {
+    201: '无上限的攻击buff',
+    202: '无上限的防御buff',
+    203: '无上限的hp上限buff',
+    204: '',
+    205: '攻击力buff',
+    206: '防御力buff',
+    207: 'hp上限buff',
+    208: '',
+    211: '背水增伤buff',
+    212: '背水减伤buff',
+    213: '',
+    214: '浑身增伤buff',
+    215: '浑身攻击力buff',
+    216: '浑身防御力buff',
+    217: '根据buff数量加减攻击buff（需配置上限）',
+    221: '连携概率buff',
+    222: '异常赋予率buff',
+    223: '回复量buff',
+    224: '',
+    225: '暴击率buff',
+    226: '充能量buff',
+    227: '免疫异常buff',
+    228: '异常抗性buff',
+    229: '连携伤害buff',
+    231: '受伤增加buff',
+    232: '受特定属性伤害增加buff',
+    233: '',
+    234: '伤害护盾',
+    235: '根性buff',
+    236: '技能威力buff',
+    237: '',
+    238: '',
+    241: '普攻反弹buff',
+    242: '普攻闪避buff',
+    243: '普攻吸血buff',
+    244: '',
+    245: '抵抗清buff的护盾',
+    246: '负面buff护盾',
+    250: '再生buff（回合结束时回血）',
+    251: '自动充能buff（回合结束时加充能）',
+    252: '被狙率buff',
+    253: '',
+    254: '',
+    255: '',
+    281: '中毒',
+    282: '麻痹',
+    283: '',
+    284: '',
+    285: '混乱',
+    286: '普攻命中率下降',
+    287: '攻击命中率下降',
+    288: '',
+    289: '',
+    290: '',
+    291: '',
+    292: '封印',
+    293: '',
+    294: '猛毒',
+    295: '侵食',
+    801: '',
+    802: '',
+    803: '',
+    811: '',
+    812: '',
+    1281: '无视耐性中毒',
+    1282: '无视耐性麻痹',
+    1285: '无视耐性混乱',
+    1292: '无视耐性封印',
+    1294: '无视耐性猛毒',
+    1295: '无视耐性侵食'
+};
+
+// 合并 ActionType + BuffType
+const MergedActionAndBuff = {};
+for (const [k,v] of Object.entries(ActionTypeOnly)) if (v) MergedActionAndBuff[k] = v;
+for (const [k,v] of Object.entries(BuffTypeOnly)) if (v) MergedActionAndBuff[k] = v;
+const sortedKeys = Object.keys(MergedActionAndBuff).sort((a,b) => parseInt(a)-parseInt(b));
+const ActionTypeFinal = {};
+sortedKeys.forEach(k => { ActionTypeFinal[k] = MergedActionAndBuff[k]; });
+
+const TargetRange = {
+    0: '无目标单位',
+    1: '敌方?体',
+    2: '敌方全体单位',
+    3: '我方?体',
+    4: '我方全体单位',
+    5: '自身',
+    6: '我方主卡',
+    7: '我方副卡',
+    10: '我方死亡的?体单位',
+    11: '我方死亡的全体单位',
+    12: '我方特定属性的单位',
+    13: '',
+    14: '除自身以外的我方全体单位',
+    20: '敌方死亡的?体单位',
+    21: '敌方死亡的全体单位',
+    22: '敌方特定属性的单位',
+    23: '',
+    32: '特定属性的自身',
+    33: '',
+    41: 'hp最高的敌方单位',
+    42: 'hp最低的敌方单位',
+    43: '防御最高的敌方单位',
+    44: '防御最低的敌方单位',
+    51: '双方hp最高的单位',
+    52: '双方hp最低的单位',
+    53: '双方防御最高的单位',
+    54: '双方防御最低的单位'
+};
+const PowerType = {
+    1: '整数类型',
+    2: '基于攻击的百分比',
+    3: '基于防御的百分比',
+    4: '基于伤害的百分比',
+    5: '固定数值',
+    6: '效果数值到效果最大数值间的随机数',
+    7: '',
+    8: '基于最大hp的百分比',
+    9: '基于当前hp的百分比'
+};
+const BuffEndType = {
+    0: '触发?次后',
+    1: '波次开始后',
+    2: '回合开始后',
+    3: '回合结束后',
+    4: '我方回合开始后',
+    5: '我方回合结束后',
+    6: '敌方回合开始后',
+    7: '敌方回合结束后',
+    201: '双人卡切换后',
+    301: '',
+    304: '',
+    401: '受到伤害后',
+    402: '',
+    501: '',
+    900: '永久',
+    901: '',
+    902: '被消除?次后',
+    903: '',
+    999: '永不结束'
+};
+const TriggerType = {
+    1: '波次开始时',
+    2: '回合开始时',
+    3: '回合结束时',
+    4: '我方回合开始时',
+    5: '我方回合结束时',
+    6: '敌方回合开始时',
+    7: '敌方回合结束时',
+    8: 'boss波次开始时',
+    11: '攻击时',
+    12: '普通攻击时',
+    13: '使用skill攻击时',
+    14: '连携攻击时',
+    15: '友方单位攻击时',
+    16: '击杀敌方单位时',
+    17: '使用skill时',
+    18: '友方单位使用skill时',
+    19: '敌方单位使用skill时',
+    20: '发生暴击时',
+    21: '攻击特定属性的单位时',
+    22: '满充能状态下攻击时',
+    31: 'hp大于?状态下攻击时',
+    32: 'hp小于?状态下攻击时',
+    33: '带有debuff状态下攻击时',
+    34: '攻击hp大于?的单位时',
+    35: '攻击hp小于于?的单位时',
+    36: '攻击带有特定buff的单位时',
+    37: '攻击有特定正面buff的单位时',
+    38: '攻击有特定debuff的单位时',
+    42: 'hp低于?时',
+    43: '特定debuff成功赋予时',
+    51: '造成破盾时',
+    100: '战斗中',
+    201: '双人卡切换时',
+    411: '即将被攻击时',
+    412: '受到伤害时',
+    413: '友方单位受伤时',
+    421: '受到特定属性伤害时',
+    422: '满充能下受到伤害时',
+    423: '受到全体攻击时',
+    424: '一回合内被攻击?次时',
+    431: 'hp大于?状态下被攻击时',
+    432: 'hp小于?状态下被攻击时',
+    433: '即将被打倒时',
+    434: '触发根性时',
+    435: '被回复时',
+    441: '友方单位被打倒时',
+    442: '受到特定debuff时',
+    451: '被破盾时'
+};
+const EffectConditionType = {
+    0: '无额外条件',
+    1: '',
+    2: '随机百分比的的概率条件',
+    3: '',
+    4: '',
+    10: '额外属性条件',
+    11: '指定角色类型的条件',
+    12: '指定目标身上拥有特定 Buff 时，效果才生效的条件',
+    101: '清除符合条件的全部buff',
+    102: '从最近添加的 Buff 开始，清除一个（或指定数量）Buff',
+    103: '清除指定类型的 Buff',
+    201: '当 Buff 结束时，触发的条件'
+};
+const TriggerConditionType = {
+    0: '无条件',
+    1: '按全局回合数间隔触发',
+    2: '按当前波次内的回合数间隔触发',
+    3: '按波次数间隔触发',
+    11: '自身拥有特定 Buff触发',
+    101: '玩家编队属性大于等于数量触发',
+    102: '玩家编队属性小于数量触发',
+    103: '主卡属性大于等于数量触发',
+    104: '主卡属性小于数量触发',
+    105: '副卡属性大于等于数量触发',
+    106: '副卡属性小于数量触发',
+    111: '敌方属性大于等于数量触发',
+    112: '敌方属性小于数量触发',
+    121: '特定角色卡大于等于数量触发',
+    122: '特定角色卡小于数量触发',
+    123: '主卡特定角色卡大于等于数量触发',
+    124: '主卡特定角色卡小于数量触发',
+    125: '副卡特定角色卡大于等于数量触发',
+    126: '副卡特定角色卡小于数量触发',
+    127: '副卡有特定角色卡时触发',
+    128: '',
+    131: '队内特定角色大于等于数量触发',
+    132: '队内特定角色小于数量触发',
+    133: '队内特定角色大于等于数量触发',
+    134: '队内特定角色小于数量触发',
+    135: '队内特定角色大于等于数量触发',
+    136: '队内特定角色小于数量触发',
+    137: '副卡有特定角色时触发',
+    138: '',
+    139: '',
+    141: '存活数为?时触发',
+    151: '',
+    152: '',
+    153: '',
+    161: '',
+    162: '',
+    163: '',
+    171: '',
+    172: '',
+    173: '',
+    201: '友方记忆卡条件触发',
+    202: '敌方记忆卡条件触发',
+    211: '',
+    301: ''
+};
+
+// ============= 定义详细注释 =============
+const HelpActionType = {
+    0: '无动作',
+    101: '(效果数值)填入倍率',
+    102: '(效果数值)填入单段倍率，(最大数值)填入乘段数后的最终倍率',
+    103: '(效果数值)填入扣血量',
+    301: '(效果数值)填入回复量',
+    311: '',
+    321: '(效果数值)填入增加数量',
+    401: '(效果数值)填入吸血量',
+    501: '(效果数值)填入解除数量，(额外条件类型)填入解除方式，(额外条件参数)填入解除数量或类型',
+    502: '(效果数值)填入解除数量，(额外条件类型)填入解除方式，(额外条件参数)填入解除数量或类型',
+    601: '(效果数值)填入复活时回复的血量',
+    701: '(效果数值)填入充能量',
+    801: '(效果数值)填入根性锁血值，一般为1。请系统自动把triggertype设为433',
+    201: '(效果数值)填入buff数值',
+    202: '(效果数值)填入buff数值',
+    203: '(效果数值)填入buff数值',
+    204: '',
+    205: '(效果数值)填入buff数值',
+    206: '(效果数值)填入buff数值',
+    207: '(效果数值)填入buff数值',
+    208: '',
+    211: '(效果数值)填入buff数值，如130为130%',
+    212: '(效果数值)填入buff数值，如130为130%',
+    213: '',
+    214: '(效果数值)填入buff数值，如130为130%',
+    215: '(效果数值)填入buff数值，如130为130%',
+    216: '(效果数值)填入buff数值，如130为130%',
+    217: '(效果数值)填入每个buff计数带来的数值。(数值上限)填入合计加成上限',
+    221: '(效果数值)填入buff数值',
+    222: '(效果数值)填入buff数值',
+    223: '(效果数值)填入buff数值',
+    224: '',
+    225: '(效果数值)填入buff数值',
+    226: '(效果数值)填入buff数值',
+    227: '(效果数值)填入0',
+    228: '(效果数值)填入buff数值',
+    229: '(效果数值)填入buff数值',
+    231: '(效果数值)填入buff数值',
+    232: '(效果数值)填入buff数值，在(额外条件类型)填入10，在(额外条件参数)选择属性类型',
+    233: '',
+    234: '(效果数值)填入buff数值',
+    235: '(效果数值)填入buff数值',
+    236: '(效果数值)填入buff数值',
+    237: '',
+    238: '',
+    241: '(效果数值)填入反击概率',
+    242: '(效果数值)填入闪避概率',
+    243: '(效果数值)填入buff数值',
+    244: '',
+    245: '(效果数值)填入buff数值（抵抗次数）',
+    246: '(效果数值)填入buff数值（抵抗次数）',
+    250: '(效果数值)填入buff数值',
+    251: '(效果数值)填入buff数值',
+    252: '(效果数值)填入buff数值',
+    253: '',
+    254: '',
+    255: '',
+    281: '(效果数值)填入扣血数值',
+    282: '(效果数值)填入0',
+    283: '',
+    284: '',
+    285: '(效果数值)填入攻击队友概率',
+    286: '(效果数值)填入闪避概率',
+    287: '(效果数值)填入闪避概率',
+    288: '',
+    289: '',
+    290: '',
+    291: '',
+    292: '(效果数值)填入0',
+    293: '',
+    294: '(效果数值)填入扣血数值',
+    295: '(效果数值)填入扣血数值',
+    801: '',
+    802: '',
+    803: '',
+    811: '',
+    812: '',
+    1281: '(效果数值)填入扣血数值',
+    1282: '(效果数值)填入0',
+    1285: '(效果数值)填入攻击队友概率',
+    1292: '(效果数值)填入0',
+    1294: '(效果数值)填入扣血数值',
+    1295: '(效果数值)填入扣血数值'
+};
+const HelpTargetRange = {
+    0: '无目标单位',
+    1: '(目标参数)填入目标个数',
+    2: '(目标参数)填入属性筛选，0为无限制，请系统提供包括无在内的属性选项',
+    3: '(目标参数)填入目标个数',
+    4: '(目标参数)填入属性筛选，0为无限制，请系统提供包括无在内的属性选项',
+    5: '自身',
+    6: '(目标参数)填入属性筛选，0为无限制，请系统提供包括无在内的属性选项',
+    7: '(目标参数)填入属性筛选，0为无限制，请系统提供包括无在内的属性选项',
+    10: '(目标参数)填入目标个数',
+    11: '(目标参数)填入属性筛选，0为无限制，请系统提供包括无在内的属性选项',
+    12: '(目标参数)填入属性筛选，0为无限制，请系统提供包括无在内的属性选项',
+    13: '',
+    14: '(目标参数)填入属性筛选，0为无限制，请系统提供包括无在内的属性选项',
+    20: '(目标参数)填入目标个数',
+    21: '(目标参数)填入属性筛选，0为无限制，请系统提供包括无在内的属性选项',
+    22: '(目标参数)填入属性筛选，0为无限制，请系统提供包括无在内的属性选项',
+    23: '',
+    32: '(目标参数)填入属性筛选，0为无限制，请系统提供包括无在内的属性选项',
+    33: '',
+    41: '(目标参数)请填0',
+    42: '(目标参数)请填0',
+    43: '(目标参数)请填0',
+    44: '(目标参数)请填0',
+    51: '(目标参数)请填0',
+    52: '(目标参数)请填0',
+    53: '(目标参数)请填0',
+    54: '(目标参数)请填0'
+};
+const HelpPowerType = {
+    1: '用于次数',
+    2: '用于攻击伤害等',
+    3: '各类百分比buff通用（包括背水浑身）',
+    4: '用于吸血等',
+    5: '用于固定伤害等',
+    6: '(效果数值)到(最大数值)之间的随机数值',
+    7: '',
+    8: '用于自残，中毒等',
+    9: '用于侵食等'
+};
+const HelpBuffEndType = {
+    0: '(结束参数)经过几次后结束buff',
+    1: '(结束参数)经过几次后结束buff',
+    2: '(结束参数)经过几次后结束buff',
+    3: '(结束参数)经过几次后结束buff',
+    4: '(结束参数)经过几次后结束buff',
+    5: '(结束参数)经过几次后结束buff',
+    6: '(结束参数)经过几次后结束buff',
+    7: '(结束参数)经过几次后结束buff',
+    201: '(结束参数)经过几次后结束buff',
+    301: '',
+    304: '',
+    401: '(结束参数)经过几次后结束buff',
+    402: '',
+    501: '',
+    900: '会被解除的永续，(结束参数)请填0',
+    901: '',
+    902: '(结束参数)解除保护次数',
+    903: '',
+    999: '无法被解除的永续，(结束参数)请填0'
+};
+const HelpTriggerType = {
+    1: '(触发参数)填0为波次开始触发，填1为战斗开始时触发',
+    2: '(触发参数)填入第几个回合开始时触发，0为每次',
+    3: '(触发参数)填入第几个回合结束时触发，0为每次',
+    4: '(触发参数)填入第几个回合开始时触发，0为每次',
+    5: '(触发参数)填入第几个回合开始时触发，0为每次',
+    6: '(触发参数)填入第几个回合开始时触发，0为每次',
+    7: '(触发参数)填入第几个回合开始时触发，0为每次',
+    8: '(触发参数)填入第几个回合开始时触发，0为每次',
+    11: '(触发参数)填入0',
+    12: '(触发参数)填入0',
+    13: '(触发参数)填入0',
+    14: '(触发参数)填入0',
+    15: '(触发参数)填入0',
+    16: '(触发参数)填入0',
+    17: '(触发参数)填入0',
+    18: '(触发参数)填入0',
+    19: '(触发参数)填入0',
+    20: '(触发参数)填入0',
+    21: '(触发参数)填入特定的属性，请系统提供包括无在内的属性选项',
+    22: '(触发参数)填入0',
+    31: '(触发参数)填入hp阈值',
+    32: '(触发参数)填入hp阈值',
+    33: '(触发参数)填入buff的id来指定buff。请系统提供bufftype的选项下拉框',
+    34: '(触发参数)填入hp阈值',
+    35: '(触发参数)填入hp阈值',
+    36: '(触发参数)填入buff的id来指定buff。请系统提供bufftype的选项下拉框',
+    37: '(触发参数)填入buff的id来指定buff。请系统提供bufftype的选项下拉框',
+    38: '(触发参数)填入buff的id来指定buff。请系统提供bufftype的选项下拉框',
+    42: '(触发参数)填入hp阈值',
+    43: '(触发参数)填入buff的id来指定buff。请系统提供bufftype的选项下拉框',
+    51: '(触发参数)填入0',
+    100: '只有装备效果使用的类型，请勿使用',
+    201: '(触发参数)填入0',
+    411: '(触发参数)填入0',
+    412: '(触发参数)填入0',
+    413: '(触发参数)填入0',
+    421: '(触发参数)填入第几次被击时触发，0为每次，请系统提供包括无在内的属性选项',
+    422: '(触发参数)填入hp阈值',
+    423: '(触发参数)填入0',
+    424: '(触发参数)填入触发所需的被攻击次数',
+    431: '(触发参数)填入hp阈值',
+    432: '(触发参数)填入hp阈值',
+    433: '(触发参数)填入0',
+    434: '(触发参数)填入0',
+    435: '(触发参数)填入0',
+    441: '(触发参数)填入0',
+    442: '(触发参数)填入buff的id来指定buff。请系统提供bufftype的选项下拉框',
+    451: '(触发参数)填入0'
+};
+const HelpEffectConditionType = {
+    0: '无额外条件',
+    1: '',
+    2: '(额外条件参数)我也不会用',
+    3: '',
+    4: '',
+    10: '请选择属性类型，(额外条件参数)填入属性代号(1-6)',
+    11: '未实装',
+    12: '(额外条件参数)填入buff的id来指定buff。请系统提供bufftype的选项下拉框',
+    101: '(额外条件参数)0为全部',
+    102: '(额外条件参数)填入解除数量',
+    103: '(额外条件参数)填入buff的id来解除指定buff。请系统提供bufftype的选项下拉框',
+    201: '未实装'
+};
+const HelpTriggerConditionType = {
+    0: '无条件',
+    1: '（前置条件参数）"2:0:2" → 从第 2 回合开始，每 2 回合触发一次',
+    2: '（前置条件参数）"1:0:3" → 每波的第 1、4、7、10...回合触发',
+    3: '（前置条件参数）"1:0:2" → 第 1、3、5、7...波触发',
+    11: '（前置条件参数）填buff的id',
+    101: '（前置条件参数），(1,1,1,1,1,1)代表六属性各大于等于1才能触发',
+    102: '（前置条件参数），(2,2,2,2,2,2)代表六属性各大于小于2才能触发',
+    103: '（前置条件参数），(1,1,1,1,1,1)代表六属性各大于等于1才能触发',
+    104: '（前置条件参数），(2,2,2,2,2,2)代表六属性各大于小于2才能触发',
+    105: '（前置条件参数），(1,1,1,1,1,1)代表六属性各大于等于1才能触发',
+    106: '（前置条件参数），(2,2,2,2,2,2)代表六属性各大于小于2才能触发',
+    111: '（前置条件参数），(1,1,1,1,1,1)代表六属性各大于等于1才能触发',
+    112: '（前置条件参数），(2,2,2,2,2,2)代表六属性各大于小于2才能触发',
+    121: '（前置条件参数），(104513:1)代表编入104513大于等于1才能触发',
+    122: '（前置条件参数），(104513:1)代表编入104513小于1才能触发，也就是0张',
+    123: '（前置条件参数），(104513:1)代表编入104513大于等于1才能触发',
+    124: '（前置条件参数），(104513:1)代表编入104513小于1才能触发，也就是0张',
+    125: '（前置条件参数），(104513:1)代表编入104513大于等于1才能触发',
+    126: '（前置条件参数），(104513:1)代表编入104513小于1才能触发，也就是0张',
+    127: '（前置条件参数），(104513)代表副卡为104513才能触发',
+    128: '',
+    131: '（前置条件参数），(1041:1)代表编入1041（爱花）大于等于1才能触发',
+    132: '（前置条件参数），(1041:1)代表编入1041（爱花）小于1才能触发，也就是0张',
+    133: '（前置条件参数），(1041:1)代表编入1041（爱花）大于等于1才能触发',
+    134: '（前置条件参数），(1041:1)代表编入1041（爱花）小于1才能触发，也就是0张',
+    135: '（前置条件参数），(1041:1)代表编入1041（爱花）大于等于1才能触发',
+    136: '（前置条件参数），(1041:1)代表编入1041（爱花）小于1才能触发，也就是0张',
+    137: '（前置条件参数），(1041)代表副卡为1041也就是爱花才能触发',
+    138: '',
+    139: '',
+    141: '（前置条件参数）[我方最少, 我方最多, 敌方最少, 敌方最多]、"1,3,0,0" → 我方存活数在 1~2 之间（即至少 1 人，少于 3 人）',
+    151: '',
+    152: '',
+    153: '',
+    161: '',
+    162: '',
+    163: '',
+    171: '',
+    172: '',
+    173: '',
+    201: '（1=红，2=蓝，3=绿）"3:1:0" → 绿类型记忆卡数量 ≥ 1时触发',
+    202: '（1=红，2=蓝，3=绿）"3:1:0" → 绿类型记忆卡数量 < 1时触发',
+    211: '',
+    301: ''
+};
+
+const AttributeEnum = {
+    0: '无',
+    1: '火',
+    2: '水',
+    3: '风',
+    4: '雷',
+    5: '光',
+    6: '暗'
+};
+const HelpAttribute = { 0:'无限制',1:'火属性',2:'水属性',3:'风属性',4:'雷属性',5:'光属性',6:'暗属性' };
+
+// ============= 2. 枚举数据列表 =============
+const ENUM_DATA = [
+    { field: 'actionType', data: ActionTypeFinal, help: HelpActionType },
+    { field: 'effectType', data: PowerType, help: HelpPowerType },
+    { field: 'targetType', data: TargetRange, help: HelpTargetRange },
+    { field: 'endType', data: BuffEndType, help: HelpBuffEndType },
+    { field: 'triggerType', data: TriggerType, help: HelpTriggerType },
+    { field: 'effectConditionType', data: EffectConditionType, help: HelpEffectConditionType },
+    { field: 'conditionType', data: TriggerConditionType, help: HelpTriggerConditionType },
+    { field: 'buffId', data: BuffTypeOnly, help: HelpActionType },
+    { field: 'attribute', data: AttributeEnum, help: HelpAttribute }
+];
+
+// ============= 核心数据 =============
+let enemies = [];
+let enemyIdCounter = 2005;
+
+const FIELD_LABELS = {
+    enemyId: '敌人ID',
+    name: '名称',
+    attribute: '属性',
+    subAttribute: '副属性',
+    hp: 'HP',
+    atk: '攻击力',
+    def: '防御力',
+    armorHp: '初始护盾量',
+    addArmorHp: '递增护盾量',
+    armorregister: '护盾抵抗系数',
+    unisonAddDamage: '特殊连携额外伤害',
+    beatlimit: '强击计数上限'
+};
+const ATTR_NAMES = { 1:'火', 2:'水', 3:'风', 4:'雷', 5:'光', 6:'暗' };
+const ELEM_ORDER = ['火','水','风','雷','光','暗','连携'];
+
+function createDefaultEnemy() {
+    const id = enemyIdCounter++;
+    return {
+        enemyId: id,
+        name: "新敌人",
+        attribute: 1,
+        subAttribute: 0,
+        hp: 50000000000,
+        atk: 8230,
+        def: 8350,
+        armorHp: 100000,
+        addArmorHp: 1000000,
+        armorregister: "50,50,50,50,50,70,300",
+        unisonAddDamage: 1000000,
+        beatlimit: 1,
+        normalAttack: { normalAttackId: id * 100 + 1, effectShowType: 2, effectShowValue: 0 },
+        skillAttackList: [],
+        abilityList: [],
+        resist: {
+            resistId: 0, statusDebuff: 0,
+            poison: 9999, paralysis: 9999, stun: 9999, sleep: 9999,
+            confuse: 9999, darkness: 9999, addDebuffTurn: 9999, zombie: 9999,
+            curse: 9999, deathSentence: 9999, sealSkill: 9999, sealPlusSkillRate: 9999,
+            deadlyPoison: 9999, erosion: 9999
+        },
+        enemyAIList: [],
+        isBoss: false,
+        rageDataList: []  // 新增
+    };
+}
+
+// ============= 构建统一的枚举输入组件 =============
+function buildEnumInput(value, fieldName, dataAttrs, extraClass = '', enumKey = null, path = '') {
+    let key = enumKey;
+    if (!key) {
+        const fname = fieldName.toLowerCase();
+        if (fname.includes('actiontype')) key = 'actionType';
+        else if (fname.includes('effecttype')) key = 'effectType';
+        else if (fname.includes('targettype')) key = 'targetType';
+        else if (fname.includes('endtype')) key = 'endType';
+        else if (fname.includes('triggertype')) key = 'triggerType';
+        else if (fname.includes('effectconditiontype')) key = 'effectConditionType';
+        else if (fname.includes('conditiontype')) key = 'conditionType';
+        else if (fname.includes('effectconditionvalue') || fname.includes('triggervalue') || fname.includes('condvalue')) key = 'buffId';
+        else if (fname.includes('targetvalue')) key = 'attribute';
+        else key = null;
+    }
+    if (!key) {
+        return `<input type="text" value="${value}" data-field="${fieldName}" ${dataAttrs} class="${extraClass}" ${path ? `data-path="${path}"` : ''} />`;
+    }
+    const enumData = ENUM_DATA.find(e => e.field === key);
+    if (!enumData) {
+        return `<input type="text" value="${value}" data-field="${fieldName}" ${dataAttrs} class="${extraClass}" ${path ? `data-path="${path}"` : ''} />`;
+    }
+    const data = enumData.data;
+    const help = enumData.help || {};
+    const displayVal = data[value] ? `${value} (${data[value]})` : value;
+    const id = `enum-${fieldName}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    let optionsHtml = '';
+    let hasOptions = false;
+    for (const [val, comment] of Object.entries(data)) {
+        if (!comment) continue;
+        hasOptions = true;
+        const display = `${val} (${comment})`;
+        optionsHtml += `<div class="enum-option" data-value="${val}" data-display="${display}">${display}</div>`;
+    }
+    if (!hasOptions) {
+        optionsHtml = `<div class="enum-empty">无可用选项</div>`;
+    }
+
+    return `
+        <div class="enum-wrapper" data-id="${id}" data-fieldname="${fieldName}" data-enum-key="${key}">
+            <input type="text" value="${displayVal}" data-field="${fieldName}" ${dataAttrs} class="${extraClass} enum-input" autocomplete="off" ${path ? `data-path="${path}"` : ''} />
+            <button type="button" class="enum-help-btn" title="查看详细说明">?</button>
+            <div class="enum-dropdown" style="display:none;">
+                ${optionsHtml}
+            </div>
+        </div>
+    `;
+}
+
+// ============= 全局枚举下拉管理器 =============
+const EnumDropdownManager = {
+    instances: new Map(),
+    activeInstance: null,
+
+    register(container) {
+        const input = container.querySelector('.enum-input');
+        const dropdown = container.querySelector('.enum-dropdown');
+        const helpBtn = container.querySelector('.enum-help-btn');
+        if (!input || !dropdown) return;
+        const fieldName = container.dataset.fieldname || '';
+        const enumKey = container.dataset.enumKey || '';
+        const enumData = ENUM_DATA.find(e => e.field === enumKey);
+        if (!enumData) return;
+
+        const options = [];
+        const items = dropdown.querySelectorAll('.enum-option');
+        items.forEach(el => {
+            options.push({
+                value: el.dataset.value,
+                display: el.dataset.display,
+                element: el
+            });
+        });
+
+        const instance = {
+            container,
+            input,
+            dropdown,
+            options,
+            enumData,
+            isOpen: false,
+            filterValue: '',
+            selectedValue: null
+        };
+
+        const id = container.dataset.id || 'enum-' + Date.now();
+        this.instances.set(id, instance);
+        this._bindEvents(instance);
+
+        if (helpBtn) {
+            helpBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const currentVal = instance.selectedValue || '';
+                const helpData = enumData.help || {};
+                let helpText = helpData[currentVal] || '暂无详细说明';
+                if (!currentVal) {
+                    helpText = '请先选择一个枚举值';
+                }
+                showHelpModal(fieldName, currentVal, helpText);
+            });
+        }
+
+        const currentVal = input.value;
+        const numMatch = currentVal.match(/^(\d+)/);
+        if (numMatch) {
+            instance.selectedValue = numMatch[1];
+        }
+
+        return instance;
+    },
+
+    _bindEvents(instance) {
+        const { input, dropdown, container, options } = instance;
+
+        input.addEventListener('input', (e) => {
+            const val = input.value;
+            const numMatch = val.match(/^(\d+)/);
+            const filterText = val.toLowerCase().trim();
+            instance.filterValue = filterText;
+
+            if (numMatch) {
+                const num = numMatch[1];
+                const matched = options.find(opt => opt.value === num);
+                if (matched) {
+                    input.value = matched.display;
+                    input.dataset.realValue = num;
+                    instance.selectedValue = num;
+                    this._closeDropdown(instance);
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    return;
+                }
+            }
+
+            this._filterAndSort(instance, filterText);
+            this._openDropdown(instance);
+        });
+
+        input.addEventListener('focus', (e) => {
+            this._closeAllExcept(instance);
+            instance.filterValue = '';
+            this._filterAndSort(instance, '');
+            this._openDropdown(instance);
+            this._highlightSelected(instance);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!container.contains(e.target)) {
+                this._closeDropdown(instance);
+            }
+        });
+
+        dropdown.addEventListener('click', (e) => {
+            const opt = e.target.closest('.enum-option');
+            if (!opt) return;
+            const val = opt.dataset.value;
+            const display = opt.dataset.display;
+            if (val !== undefined) {
+                input.value = display;
+                input.dataset.realValue = val;
+                instance.selectedValue = val;
+                this._closeDropdown(instance);
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (!instance.isOpen) {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    instance.filterValue = '';
+                    this._filterAndSort(instance, '');
+                    this._openDropdown(instance);
+                }
+                return;
+            }
+            const visible = dropdown.querySelectorAll('.enum-option:not([style*="display:none"])');
+            if (visible.length === 0) return;
+            let currentIdx = -1;
+            visible.forEach((el, i) => {
+                if (el.classList.contains('selected')) currentIdx = i;
+            });
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const idx = Math.min(currentIdx + 1, visible.length - 1);
+                visible.forEach(el => el.classList.remove('selected'));
+                visible[idx].classList.add('selected');
+                visible[idx].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const idx = Math.max(currentIdx - 1, 0);
+                visible.forEach(el => el.classList.remove('selected'));
+                visible[idx].classList.add('selected');
+                visible[idx].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const selected = dropdown.querySelector('.enum-option.selected');
+                if (selected) {
+                    const val = selected.dataset.value;
+                    const display = selected.dataset.display;
+                    input.value = display;
+                    input.dataset.realValue = val;
+                    instance.selectedValue = val;
+                    this._closeDropdown(instance);
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                this._closeDropdown(instance);
+            }
+        });
+    },
+
+    _filterAndSort(instance, filterText) {
+        const { dropdown, options } = instance;
+        const filter = filterText.toLowerCase().trim();
+
+        const matched = [];
+        const unmatched = [];
+        options.forEach(opt => {
+            const display = opt.display.toLowerCase();
+            const value = opt.value;
+            if (filter === '' || display.includes(filter) || value.includes(filter)) {
+                let score = 0;
+                if (display === filter || value === filter) score = 100;
+                else if (display.startsWith(filter) || value.startsWith(filter)) score = 80;
+                else if (display.includes(filter) || value.includes(filter)) score = 60;
+                matched.push({ ...opt, score });
+            } else {
+                unmatched.push({ ...opt, score: 0 });
+            }
+        });
+
+        matched.sort((a, b) => b.score - a.score);
+
+        const allOptions = [...matched, ...unmatched];
+        dropdown.innerHTML = '';
+        if (allOptions.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'enum-empty';
+            empty.textContent = '无匹配选项';
+            dropdown.appendChild(empty);
+        } else {
+            allOptions.forEach(opt => {
+                const el = opt.element;
+                el.classList.remove('matched', 'unmatched', 'selected');
+                if (matched.includes(opt)) {
+                    el.classList.add('matched');
+                } else {
+                    el.classList.add('unmatched');
+                }
+                dropdown.appendChild(el);
+            });
+        }
+    },
+
+    _openDropdown(instance) {
+        if (instance.isOpen) return;
+        instance.isOpen = true;
+        instance.dropdown.style.display = 'block';
+        const rect = instance.container.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        if (spaceBelow < 300) {
+            instance.dropdown.style.top = 'auto';
+            instance.dropdown.style.bottom = '100%';
+            instance.dropdown.style.marginTop = '0';
+            instance.dropdown.style.marginBottom = '2px';
+        } else {
+            instance.dropdown.style.top = '100%';
+            instance.dropdown.style.marginTop = '2px';
+            instance.dropdown.style.marginBottom = '0';
+        }
+        this.activeInstance = instance;
+    },
+
+    _closeDropdown(instance) {
+        if (!instance.isOpen) return;
+        instance.isOpen = false;
+        instance.dropdown.style.display = 'none';
+        if (this.activeInstance === instance) {
+            this.activeInstance = null;
+        }
+    },
+
+    _closeAllExcept(instance) {
+        for (const [id, inst] of this.instances) {
+            if (inst !== instance) {
+                this._closeDropdown(inst);
+            }
+        }
+    },
+
+    _highlightSelected(instance) {
+        const { dropdown, selectedValue } = instance;
+        const options = dropdown.querySelectorAll('.enum-option');
+        options.forEach(el => {
+            el.classList.remove('selected');
+            if (el.dataset.value === selectedValue) {
+                el.classList.add('selected');
+            }
+        });
+    }
+};
+
+// ============= 帮助模态框 =============
+function showHelpModal(fieldName, value, helpText) {
+    const modal = document.getElementById('helpModal');
+    const title = document.getElementById('helpTitle');
+    const content = document.getElementById('helpContent');
+    if (value === '' || value === undefined) {
+        // 纯帮助模式（用于rage等）
+        title.textContent = fieldName;
+        content.textContent = helpText;
+    } else {
+        title.textContent = `${fieldName} - 值 ${value} 的详细说明`;
+        content.textContent = helpText;
+    }
+    modal.classList.add('active');
+}
+
+document.getElementById('helpClose').addEventListener('click', () => {
+    document.getElementById('helpModal').classList.remove('active');
+});
+document.getElementById('helpModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+        document.getElementById('helpModal').classList.remove('active');
+    }
+});
+
+// ============= 初始化所有枚举下拉 =============
+function setupEnumPickers() {
+    const wrappers = document.querySelectorAll('.enum-wrapper');
+    wrappers.forEach(wrapper => {
+        if (wrapper.dataset.initialized === 'true') return;
+        EnumDropdownManager.register(wrapper);
+        wrapper.dataset.initialized = 'true';
+    });
+}
+
+// ============= 联动条件判断函数 =============
+function shouldUseAttributeEnum(targetType) {
+    const attrTargetTypes = [2,4,6,7,11,12,14,21,22,32];
+    return attrTargetTypes.includes(parseInt(targetType));
+}
+function shouldUseBuffIdForEffectCondition(effectConditionType) {
+    const buffNeeded = [12,103];
+    return buffNeeded.includes(parseInt(effectConditionType));
+}
+function shouldUseAttributeForEffectCondition(effectConditionType) {
+    return parseInt(effectConditionType) === 10;
+}
+function shouldUseAttributeForTrigger(triggerType) {
+    const attrNeeded = [21, 421];
+    return attrNeeded.includes(parseInt(triggerType));
+}
+function shouldUseBuffIdForTrigger(triggerType) {
+    const buffNeeded = [33, 36, 37, 38, 43, 442];
+    return buffNeeded.includes(parseInt(triggerType));
+}
+function shouldUseBuffIdForCondition(conditionType) {
+    return parseInt(conditionType) === 11;
+}
+
+// ============= 条件参数拆分/合并工具 =============
+function getConditionParts(type, value) {
+    const t = parseInt(type);
+    let parts = {};
+    const v = (value || '').toString();
+    if (t === 0) return { count: 0 };
+    if (t === 1 || t === 2) {
+        const arr = v.split(':');
+        return { count: 3, start: arr[0]||'', end: arr[1]||'', interval: arr[2]||'' };
+    }
+    if (t === 3) {
+        const arr = v.split(':');
+        return { count: 3, start: arr[0]||'', end: arr[1]||'', interval: arr[2]||'' };
+    }
+    if (t === 11) {
+        return { count: 1, buffId: v };
+    }
+    if (t >= 101 && t <= 112) {
+        const match = v.match(/^\(([^)]+)\)$/);
+        let vals = match ? match[1].split(',') : ['','','','','',''];
+        while (vals.length < 6) vals.push('');
+        return { count: 6, fire: vals[0], water: vals[1], wind: vals[2], thunder: vals[3], light: vals[4], dark: vals[5] };
+    }
+    if ((t >= 121 && t <= 127) || (t >= 131 && t <= 137)) {
+        const arr = v.split(':');
+        return { count: 2, id: arr[0]||'', countVal: arr[1]||'' };
+    }
+    if (t === 141) {
+        const arr = v.split(',');
+        return { count: 4, allyMin: arr[0]||'', allyMax: arr[1]||'', enemyMin: arr[2]||'', enemyMax: arr[3]||'' };
+    }
+    if (t === 201 || t === 202) {
+        const arr = v.split(':');
+        return { count: 3, memType: arr[0]||'', memMin: arr[1]||'', memMax: arr[2]||'' };
+    }
+    return { count: 1, value: v };
+}
+
+function serializeConditionValue(type, parts) {
+    const t = parseInt(type);
+    if (t === 0) return '';
+    if (t === 1 || t === 2) {
+        return `${parts.start || 0}:${parts.end || 0}:${parts.interval || 0}`;
+    }
+    if (t === 3) {
+        return `${parts.start || 0}:${parts.end || 0}:${parts.interval || 0}`;
+    }
+    if (t === 11) {
+        return parts.buffId || '0';
+    }
+    if (t >= 101 && t <= 112) {
+        return `(${parts.fire||0},${parts.water||0},${parts.wind||0},${parts.thunder||0},${parts.light||0},${parts.dark||0})`;
+    }
+    if ((t >= 121 && t <= 127) || (t >= 131 && t <= 137)) {
+        return `${parts.id || 0}:${parts.countVal || 0}`;
+    }
+    if (t === 141) {
+        return `${parts.allyMin||0},${parts.allyMax||0},${parts.enemyMin||0},${parts.enemyMax||0}`;
+    }
+    if (t === 201 || t === 202) {
+        return `${parts.memType||1}:${parts.memMin||0}:${parts.memMax||0}`;
+    }
+    return parts.value || '';
+}
+
+// ============= 构建条件值输入框 HTML =============
+function buildConditionValueInputs(cond, ci, ai, idx) {
+    const type = parseInt(cond.conditionType);
+    const parts = getConditionParts(type, cond.conditionValue);
+    const baseAttrs = `data-ci="${ci}" data-ai="${ai}"`;
+    const pathPrefix = `enemy-${idx}-ability-${ai}-condition-${ci}`;
+    let html = '<div class="cond-parts-container">';
+
+    if (type === 0) {
+        html += `<span style="color:#666;font-size:0.8rem;">无参数</span>`;
+    } else if (type === 1 || type === 2) {
+        html += `<div class="cond-part"><label>开始回合</label><input type="number" class="short" data-part="start" value="${parts.start||0}" ${baseAttrs} data-path="${pathPrefix}-start" /></div>`;
+        html += `<div class="cond-part"><label>结束回合</label><input type="number" class="short" data-part="end" value="${parts.end||0}" ${baseAttrs} data-path="${pathPrefix}-end" /></div>`;
+        html += `<div class="cond-part"><label>间隔回合</label><input type="number" class="short" data-part="interval" value="${parts.interval||0}" ${baseAttrs} data-path="${pathPrefix}-interval" /></div>`;
+    } else if (type === 3) {
+        html += `<div class="cond-part"><label>开始波次</label><input type="number" class="short" data-part="start" value="${parts.start||0}" ${baseAttrs} data-path="${pathPrefix}-start" /></div>`;
+        html += `<div class="cond-part"><label>结束波次</label><input type="number" class="short" data-part="end" value="${parts.end||0}" ${baseAttrs} data-path="${pathPrefix}-end" /></div>`;
+        html += `<div class="cond-part"><label>间隔波次</label><input type="number" class="short" data-part="interval" value="${parts.interval||0}" ${baseAttrs} data-path="${pathPrefix}-interval" /></div>`;
+    } else if (type === 11) {
+        html += `<div class="cond-part"><label>Buff ID</label><input type="text" class="medium" data-part="buffId" value="${parts.buffId||0}" ${baseAttrs} data-path="${pathPrefix}-buffId" /></div>`;
+        html += `<span style="font-size:0.7rem;color:#888;">(输入Buff ID)</span>`;
+    } else if (type >= 101 && type <= 112) {
+        const labels = ['火','水','风','雷','光','暗'];
+        const keys = ['fire','water','wind','thunder','light','dark'];
+        keys.forEach((k, i) => {
+            html += `<div class="cond-part"><label>${labels[i]}</label><input type="number" class="short" data-part="${k}" value="${parts[k]||0}" ${baseAttrs} data-path="${pathPrefix}-${k}" /></div>`;
+        });
+    } else if (type >= 121 && type <= 127) {
+        html += `<div class="cond-part"><label>卡片id</label><input type="text" class="medium" data-part="id" value="${parts.id||0}" ${baseAttrs} data-path="${pathPrefix}-id" /></div>`;
+        html += `<div class="cond-part"><label>限制数量</label><input type="number" class="short" data-part="countVal" value="${parts.countVal||0}" ${baseAttrs} data-path="${pathPrefix}-count" /></div>`;
+    } else if (type >= 131 && type <= 137) {
+        html += `<div class="cond-part"><label>角色组id</label><input type="text" class="medium" data-part="id" value="${parts.id||0}" ${baseAttrs} data-path="${pathPrefix}-id" /></div>`;
+        html += `<div class="cond-part"><label>限制数量</label><input type="number" class="short" data-part="countVal" value="${parts.countVal||0}" ${baseAttrs} data-path="${pathPrefix}-count" /></div>`;
+    } else if (type === 141) {
+        html += `<div class="cond-part"><label>我方最少</label><input type="number" class="short" data-part="allyMin" value="${parts.allyMin||0}" ${baseAttrs} data-path="${pathPrefix}-allyMin" /></div>`;
+        html += `<div class="cond-part"><label>我方最多</label><input type="number" class="short" data-part="allyMax" value="${parts.allyMax||0}" ${baseAttrs} data-path="${pathPrefix}-allyMax" /></div>`;
+        html += `<div class="cond-part"><label>敌方最少</label><input type="number" class="short" data-part="enemyMin" value="${parts.enemyMin||0}" ${baseAttrs} data-path="${pathPrefix}-enemyMin" /></div>`;
+        html += `<div class="cond-part"><label>敌方最多</label><input type="number" class="short" data-part="enemyMax" value="${parts.enemyMax||0}" ${baseAttrs} data-path="${pathPrefix}-enemyMax" /></div>`;
+    } else if (type === 201 || type === 202) {
+        html += `<div class="cond-part"><label>记忆类型(1红2蓝3绿)</label><input type="number" class="short" data-part="memType" value="${parts.memType||1}" ${baseAttrs} data-path="${pathPrefix}-memType" /></div>`;
+        html += `<div class="cond-part"><label>最小数量</label><input type="number" class="short" data-part="memMin" value="${parts.memMin||0}" ${baseAttrs} data-path="${pathPrefix}-memMin" /></div>`;
+        html += `<div class="cond-part"><label>最大数量</label><input type="number" class="short" data-part="memMax" value="${parts.memMax||0}" ${baseAttrs} data-path="${pathPrefix}-memMax" /></div>`;
+    } else {
+        html += `<input type="text" class="long" data-part="value" value="${parts.value||''}" ${baseAttrs} data-path="${pathPrefix}-value" style="flex:1;background:#1a1a2e;border:1px solid #3a4a5a;border-radius:3px;padding:4px 6px;color:#fff;" />`;
+    }
+
+    html += '</div>';
+    return html;
+}
+
+// ============= 构建动作 HTML =============
+function buildActionHTML(action, type, idx1, idx2, enemyIdx) {
+    const isAbility = (type === 'ability');
+    const si = isAbility ? '' : idx1;
+    const ai = isAbility ? idx1 : idx2;
+    const ai2 = isAbility ? idx2 : '';
+    const prefix = isAbility ? 'abAction' : 'action';
+    const removeAction = isAbility ? 'remove-ability-action' : 'remove-skill-action';
+
+    const rows = [
+        { fields: ['ShortText'], label: 'shortText(技能描述)' },
+        { fields: ['Index', 'Type'], labels: ['index(索引)', 'actionType(动作/buff类型)'] },
+        { fields: ['EffectType', 'EffectValue', 'EffectLimit'], labels: ['effectType(数值类型)', 'effectValue(效果数值)', 'effectLimit(最大数值)'] },
+        { fields: ['EffectConditionType', 'EffectConditionValue'], labels: ['effectConditionType(额外条件类型)', 'effectConditionValue(额外条件参数)'] },
+        { fields: ['Occurrence', 'Success'], labels: ['occurrence(发动概率)', 'successRate(赋予概率)'] },
+        { fields: ['TargetType', 'TargetValue'], labels: ['targetType(目标类型)', 'targetValue(目标参数)'] },
+        { fields: ['EndType', 'EndValue'], labels: ['endType(结束类型)', 'endValue(结束参数)'] }
+    ];
+
+    const propMap = {
+        'Index': 'index',
+        'Type': 'actionType',
+        'EffectType': 'effectType',
+        'EffectValue': 'effectValue',
+        'EffectLimit': 'effectLimit',
+        'EffectConditionType': 'effectConditionType',
+        'EffectConditionValue': 'effectConditionValue',
+        'Occurrence': 'occurrenceRate',
+        'Success': 'successRate',
+        'TargetType': 'targetType',
+        'TargetValue': 'targetValue',
+        'EndType': 'endType',
+        'EndValue': 'endValue',
+        'ShortText': 'shortText'
+    };
+
+    const currentTargetType = parseInt(action.targetType) || 0;
+    const currentEffectConditionType = parseInt(action.effectConditionType) || 0;
+
+    let rowsHtml = rows.map(row => {
+        if (row.fields[0] === 'ShortText') {
+            const val = action.shortText || '';
+            const fieldName = prefix + 'ShortText';
+            let dataAttrs = isAbility ? `data-ai="${ai}" data-ai2="${ai2}"` : `data-si="${si}" data-ai="${ai}"`;
+            return `
+                <div class="action-shorttext">
+                    <label>${row.label}</label>
+                    <input type="text" value="${val}" data-field="${fieldName}" ${dataAttrs} />
+                </div>
+            `;
+        } else {
+            let fieldsHtml = row.fields.map((fKey, idx) => {
+                const prop = propMap[fKey];
+                let val = action[prop] !== undefined ? action[prop] : '';
+                if (typeof val === 'string' && val.includes('"')) val = val.replace(/"/g, '&quot;');
+                const fieldName = prefix + fKey;
+                let dataAttrs = isAbility ? `data-ai="${ai}" data-ai2="${ai2}"` : `data-si="${si}" data-ai="${ai}"`;
+                const label = row.labels[idx] || fKey;
+                const enumFields = ['actiontype', 'effecttype', 'effectconditiontype', 'targettype', 'endtype'];
+                let isEnum = false;
+                for (const ef of enumFields) {
+                    if (fieldName.toLowerCase().includes(ef)) {
+                        isEnum = true;
+                        break;
+                    }
+                }
+                if (isEnum) {
+                    const path = isAbility ? `enemy-${enemyIdx}-ability-${ai}-action-${ai2}-${fKey}` : `enemy-${enemyIdx}-skill-${si}-action-${ai}-${fKey}`;
+                    return `
+                        <div class="field-group">
+                            <label>${label}</label>
+                            ${buildEnumInput(val, fieldName, dataAttrs, '', null, path)}
+                        </div>
+                    `;
+                }
+
+                const fnameLower = fieldName.toLowerCase();
+                let inputHtml = '';
+                if (fnameLower.includes('targetvalue')) {
+                    if (shouldUseAttributeEnum(currentTargetType)) {
+                        const path = isAbility ? `enemy-${enemyIdx}-ability-${ai}-action-${ai2}-targetValue` : `enemy-${enemyIdx}-skill-${si}-action-${ai}-targetValue`;
+                        inputHtml = buildEnumInput(val, fieldName, dataAttrs, '', 'attribute', path);
+                    } else {
+                        inputHtml = `<input type="number" value="${val}" data-field="${fieldName}" ${dataAttrs} />`;
+                    }
+                } else if (fnameLower.includes('effectconditionvalue')) {
+                    if (shouldUseAttributeForEffectCondition(currentEffectConditionType)) {
+                        const path = isAbility ? `enemy-${enemyIdx}-ability-${ai}-action-${ai2}-effectConditionValue` : `enemy-${enemyIdx}-skill-${si}-action-${ai}-effectConditionValue`;
+                        inputHtml = buildEnumInput(val, fieldName, dataAttrs, '', 'attribute', path);
+                    } else if (shouldUseBuffIdForEffectCondition(currentEffectConditionType)) {
+                        const path = isAbility ? `enemy-${enemyIdx}-ability-${ai}-action-${ai2}-effectConditionValue` : `enemy-${enemyIdx}-skill-${si}-action-${ai}-effectConditionValue`;
+                        inputHtml = buildEnumInput(val, fieldName, dataAttrs, '', 'buffId', path);
+                    } else {
+                        inputHtml = `<input type="text" value="${val}" data-field="${fieldName}" ${dataAttrs} />`;
+                    }
+                } else {
+                    const inputType = (prop === 'effectValue' || prop === 'effectLimit' || prop === 'occurrenceRate' || prop === 'successRate' || prop === 'endValue' || prop === 'targetValue') ? 'number' : 'text';
+                    inputHtml = `<input type="${inputType}" value="${val}" data-field="${fieldName}" ${dataAttrs} />`;
+                }
+                return `
+                    <div class="field-group">
+                        <label>${label}</label>
+                        ${inputHtml}
+                    </div>
+                `;
+            }).join('');
+            return `<div class="action-row">${fieldsHtml}</div>`;
+        }
+    }).join('');
+
+    let removeData = isAbility ? `data-ai="${ai}" data-ai2="${ai2}"` : `data-si="${si}" data-ai="${ai}"`;
+
+    return `
+        <div class="action-block">
+            <button class="remove-btn" data-action="${removeAction}" ${removeData}>×</button>
+            ${rowsHtml}
+        </div>
+    `;
+}
+
+// ============= 渲染敌人列表 =============
+function renderEnemies() {
+    // 记录当前焦点元素路径
+    const activeEl = document.activeElement;
+    let focusPath = null;
+    if (activeEl && activeEl.closest('#enemyList')) {
+        focusPath = activeEl.getAttribute('data-path');
+    }
+
+    const container = document.getElementById('enemyList');
+    container.innerHTML = '';
+    enemies.forEach((enemy, idx) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.idx = idx;
+
+        const header = document.createElement('div');
+        header.className = 'card-header';
+        header.innerHTML = `
+            <span class="title">${enemy.name} (ID: ${enemy.enemyId})</span>
+            <div>
+                <button class="btn btn-danger btn-sm remove-enemy" data-idx="${idx}">删除</button>
+                <button class="btn btn-secondary btn-sm toggle-enemy">折叠/展开</button>
+            </div>
+        `;
+        card.appendChild(header);
+
+        const body = document.createElement('div');
+        body.className = 'card-body';
+        body.innerHTML = buildEnemyFormHTML(enemy, idx);
+        card.appendChild(body);
+        container.appendChild(card);
+
+        const toggleBtn = header.querySelector('.toggle-enemy');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const cardBody = this.closest('.card').querySelector('.card-body');
+                if (cardBody) cardBody.classList.toggle('collapsed');
+            });
+        }
+
+        const removeBtn = header.querySelector('.remove-enemy');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (confirm(`删除敌人 ${enemy.name}？`)) {
+                    enemies.splice(idx, 1);
+                    renderEnemies();
+                }
+            });
+        }
+
+        // 绑定条件拆分输入
+        body.querySelectorAll('.cond-parts-container input[data-part]').forEach(el => {
+            el.addEventListener('input', function() {
+                const ci = parseInt(this.dataset.ci);
+                const ai = parseInt(this.dataset.ai);
+                const enemy = enemies[idx];
+                const ability = enemy.abilityList[ai];
+                if (!ability || !ability.conditionList || !ability.conditionList[ci]) return;
+                const cond = ability.conditionList[ci];
+                const parts = {};
+                const container = this.closest('.cond-parts-container');
+                container.querySelectorAll('input[data-part]').forEach(input => {
+                    parts[input.dataset.part] = input.value;
+                });
+                cond.conditionValue = serializeConditionValue(cond.conditionType, parts);
+                updatePreview();
+            });
+        });
+
+        // 绑定普通输入
+        body.querySelectorAll('input, select, textarea').forEach(el => {
+            const field = el.dataset.field;
+            if (field) {
+                el.addEventListener('change', () => updateEnemyField(idx, field, el));
+                const structuralFields = ['targetType', 'effectConditionType', 'triggerType', 'conditionType', 'actionType', 'armorregister_', 'skill', 'ab', 'isBoss'];
+                const isStructural = structuralFields.some(sf => field.includes(sf));
+                if (!isStructural) {
+                    el.addEventListener('input', () => updateEnemyField(idx, field, el));
+                }
+            }
+        });
+
+        // 绑定 rage 帮助按钮
+        body.querySelectorAll('.rage-help-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const label = this.dataset.label;
+                const help = this.dataset.help;
+                if (label && help) {
+                    showHelpModal(label, '', help);
+                }
+            });
+        });
+
+        // 绑定 rage 添加/删除
+        body.querySelector('.add-rage-btn')?.addEventListener('click', function() {
+            const enemy = enemies[idx];
+            if (!enemy.rageDataList) enemy.rageDataList = [];
+            enemy.rageDataList.push({
+                bossId: 0,
+                rageFrom: 0,
+                rageTo: 0,
+                rageAtk: 100,
+                rageDef: 100,
+                rageSkillIndex: 0,
+                beatId: 0,
+                rageAnimId: 0,
+                gaugeColorId: 0
+            });
+            renderEnemies();
+        });
+
+        // 绑定 rage 删除（事件委托）
+        body.querySelectorAll('.rage-entry .remove-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const idx = parseInt(this.dataset.rageIdx);
+                const enemy = enemies[idx];
+                if (enemy && enemy.rageDataList) {
+                    const rageIdx = parseInt(this.dataset.rageIndex);
+                    if (!isNaN(rageIdx)) {
+                        enemy.rageDataList.splice(rageIdx, 1);
+                        renderEnemies();
+                    }
+                }
+            });
+        });
+
+        // 绑定 rage 输入事件
+        body.querySelectorAll('.rage-entry input[data-rage-field]').forEach(el => {
+            el.addEventListener('input', function() {
+                const enemyIdx = parseInt(this.dataset.enemyIdx);
+                const rageIdx = parseInt(this.dataset.rageIndex);
+                const field = this.dataset.rageField;
+                const enemy = enemies[enemyIdx];
+                if (!enemy || !enemy.rageDataList || !enemy.rageDataList[rageIdx]) return;
+                const val = this.value;
+                const numVal = parseFloat(val);
+                if (!isNaN(numVal)) {
+                    enemy.rageDataList[rageIdx][field] = numVal;
+                } else {
+                    enemy.rageDataList[rageIdx][field] = 0;
+                }
+                updatePreview();
+            });
+        });
+
+        body.querySelectorAll('.fold-header').forEach(fh => {
+            const targetId = fh.dataset.target;
+            if (targetId) {
+                const target = body.querySelector('#' + targetId);
+                if (target) {
+                    fh.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        target.classList.toggle('collapsed');
+                    });
+                }
+            }
+        });
+
+        body.querySelector('.add-skill-btn')?.addEventListener('click', () => {
+            const newSkill = {
+                skillId: enemy.enemyId * 100 + (enemy.skillAttackList.length + 1),
+                name: "新技能",
+                effectShowType: null,
+                spineDirectoryPath: null,
+                spineName: null,
+                aniName: null,
+                hitEffectName: null,
+                hitEffectAniName: null,
+                bgmVolumeAmount: null,
+                actionList: [],
+                skillGroupIndex: 1
+            };
+            enemy.skillAttackList.push(newSkill);
+            renderEnemies();
+        });
+
+        body.querySelector('.add-ability-btn')?.addEventListener('click', () => {
+            const newAbility = {
+                abilityId: enemy.enemyId * 100 + (enemy.abilityList.length + 1),
+                name: "新天赋",
+                shortName: "",
+                triggerType: 1,
+                triggerValue: "0",
+                invokeLimitCount: 0,
+                conditionList: [],
+                actionList: []
+            };
+            enemy.abilityList.push(newAbility);
+            renderEnemies();
+        });
+
+        bindSubAddButtons(body, idx);
+    });
+
+    setupEnumPickers();
+    updatePreview();
+
+    // 恢复焦点
+    if (focusPath) {
+        const target = document.querySelector(`[data-path="${focusPath}"]`);
+        if (target) {
+            target.focus();
+            target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+    }
+}
+
+// ============= 构建敌人表单 HTML =============
+function buildEnemyFormHTML(enemy, idx) {
+    const attrOptions = [1,2,3,4,5,6].map(v => `<option value="${v}" ${enemy.attribute===v?'selected':''}>${ATTR_NAMES[v]}</option>`).join('');
+    const subAttrOptions = `<option value="0" ${enemy.subAttribute===0?'selected':''}>无</option>` + [1,2,3,4,5,6].map(v => `<option value="${v}" ${enemy.subAttribute===v?'selected':''}>${ATTR_NAMES[v]}</option>`).join('');
+
+    const armorVals = enemy.armorregister ? enemy.armorregister.split(',').map(v => parseInt(v.trim()) || 50) : [50,50,50,50,50,50,50];
+    while (armorVals.length < 7) armorVals.push(50);
+    const elemNames = ['火','水','风','雷','光','暗','连携'];
+
+    let html = `
+        <div class="fold-group">
+            <div class="fold-header" data-target="basicParams_${idx}"><span class="label">📊 基本参数</span><span class="text-muted">点击折叠</span></div>
+            <div class="fold-body" id="basicParams_${idx}">
+                <div class="row">
+                    <div class="field-group"><label>${FIELD_LABELS.enemyId}</label><input type="number" value="${enemy.enemyId}" data-field="enemyId" /></div>
+                    <div class="field-group"><label>${FIELD_LABELS.name}</label><input type="text" value="${enemy.name}" data-field="name" /></div>
+                    <div class="field-group"><label>${FIELD_LABELS.attribute}</label><select data-field="attribute">${attrOptions}</select></div>
+                    <div class="field-group"><label>${FIELD_LABELS.subAttribute}</label><select data-field="subAttribute">${subAttrOptions}</select></div>
+                </div>
+                <div class="row">
+                    <div class="field-group"><label>${FIELD_LABELS.hp}</label><input type="number" value="${enemy.hp}" data-field="hp" /></div>
+                    <div class="field-group"><label>${FIELD_LABELS.atk}</label><input type="number" value="${enemy.atk}" data-field="atk" /></div>
+                    <div class="field-group"><label>${FIELD_LABELS.def}</label><input type="number" value="${enemy.def}" data-field="def" /></div>
+                    <div class="field-group"><label>${FIELD_LABELS.armorHp}</label><input type="number" value="${enemy.armorHp}" data-field="armorHp" /></div>
+                </div>
+                <div class="row">
+                    <div class="field-group"><label>${FIELD_LABELS.addArmorHp}</label><input type="number" value="${enemy.addArmorHp}" data-field="addArmorHp" /></div>
+                    <div class="field-group"><label>${FIELD_LABELS.unisonAddDamage}</label><input type="number" value="${enemy.unisonAddDamage}" data-field="unisonAddDamage" /></div>
+                    <div class="field-group"><label>${FIELD_LABELS.beatlimit}</label><input type="number" value="${enemy.beatlimit}" data-field="beatlimit" /></div>
+                </div>
+                <div class="armor-row">
+                    <span style="font-weight:600; color:#bbb; font-size:0.85rem; margin-right:8px;">${FIELD_LABELS.armorregister}</span>
+                    ${elemNames.map((name, i) => `
+                        <span class="armor-item">
+                            <label>${name}</label>
+                            <input type="number" value="${armorVals[i] || 50}" data-field="armorregister_${i}" />
+                        </span>
+                    `).join('')}
+                </div>
+                <div class="row">
+                    <div class="field-group"><label>是否为Boss</label><input type="checkbox" ${enemy.isBoss?'checked':''} data-field="isBoss" style="width:20px;flex:0;" /></div>
+                </div>
+                ${enemy.isBoss ? buildRageHTML(enemy, idx) : ''}
+            </div>
+        </div>
+    `;
+
+    html += `
+        <div class="fold-group">
+            <div class="fold-header" data-target="resistParams_${idx}"><span class="label">🛡️ 异常耐性</span><span class="text-muted">点击折叠</span></div>
+            <div class="fold-body" id="resistParams_${idx}">
+                <div class="row">
+                    <div class="field-group"><label>中毒</label><input type="number" value="${enemy.resist.poison}" data-field="resist_poison" /></div>
+                    <div class="field-group"><label>麻痹</label><input type="number" value="${enemy.resist.paralysis}" data-field="resist_paralysis" /></div>
+                    <div class="field-group"><label>混乱</label><input type="number" value="${enemy.resist.confuse}" data-field="resist_confuse" /></div>
+                    <div class="field-group"><label>暗黑(普攻)</label><input type="number" value="${enemy.resist.darkness}" data-field="resist_darkness" /></div>
+                </div>
+                <div class="row">
+                    <div class="field-group"><label>暗黑(全)</label><input type="number" value="${enemy.resist.darkness}" data-field="resist_darknessAll" /></div>
+                    <div class="field-group"><label>猛毒</label><input type="number" value="${enemy.resist.deadlyPoison || 9999}" data-field="resist_deadlyPoison" /></div>
+                    <div class="field-group"><label>封印</label><input type="number" value="${enemy.resist.sealSkill}" data-field="resist_sealSkill" /></div>
+                    <div class="field-group"><label>侵蚀</label><input type="number" value="${enemy.resist.erosion}" data-field="resist_erosion" /></div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    let skillsHtml = `
+        <div class="fold-group">
+            <div class="fold-header" data-target="skillList_${idx}"><span class="label">⚔️ 技能列表 (${enemy.skillAttackList.length})</span><span class="text-muted">点击折叠</span></div>
+            <div class="fold-body" id="skillList_${idx}">
+                <button class="btn btn-sm btn-success add-skill-btn" style="margin-bottom:10px;">+ 添加技能</button>
+    `;
+    enemy.skillAttackList.forEach((skill, si) => {
+        const actionsHtml = skill.actionList.map((action, ai) => buildActionHTML(action, 'skill', si, ai, idx)).join('');
+        const spineDirVal = (skill.spineDirectoryPath === null || skill.spineDirectoryPath === undefined || skill.spineDirectoryPath === '') ? '' : skill.spineDirectoryPath;
+        const spineDirPlaceholder = (skill.spineDirectoryPath === null || skill.spineDirectoryPath === undefined || skill.spineDirectoryPath === '') ? '不用填写' : '';
+        const spineNameVal = (skill.spineName === null || skill.spineName === undefined || skill.spineName === '') ? '' : skill.spineName;
+        const spineNamePlaceholder = (skill.spineName === null || skill.spineName === undefined || skill.spineName === '') ? '不用填写' : '';
+        const aniNameVal = (skill.aniName === null || skill.aniName === undefined || skill.aniName === '') ? '' : skill.aniName;
+        const aniNamePlaceholder = (skill.aniName === null || skill.aniName === undefined || skill.aniName === '') ? '不用填写' : '';
+        const hitEffectVal = (skill.hitEffectName === null || skill.hitEffectName === undefined || skill.hitEffectName === '') ? '' : skill.hitEffectName;
+        const hitEffectPlaceholder = (skill.hitEffectName === null || skill.hitEffectName === undefined || skill.hitEffectName === '') ? '不用填写' : '';
+        const hitAniVal = (skill.hitEffectAniName === null || skill.hitEffectAniName === undefined || skill.hitEffectAniName === '') ? '' : skill.hitEffectAniName;
+        const hitAniPlaceholder = (skill.hitEffectAniName === null || skill.hitEffectAniName === undefined || skill.hitEffectAniName === '') ? '不用填写' : '';
+        const bgmVal = (skill.bgmVolumeAmount === null || skill.bgmVolumeAmount === undefined) ? '' : skill.bgmVolumeAmount;
+        const bgmPlaceholder = (skill.bgmVolumeAmount === null || skill.bgmVolumeAmount === undefined) ? '不用填写' : '';
+        const effectShowTypeVal = (skill.effectShowType === null || skill.effectShowType === undefined) ? '' : skill.effectShowType;
+        const effectShowTypePlaceholder = (skill.effectShowType === null || skill.effectShowType === undefined) ? '不用填写' : '';
+
+        skillsHtml += `
+            <div class="list-item">
+                <button class="remove-btn" data-action="remove-skill" data-si="${si}">×</button>
+                <div class="flex-row three-col">
+                    <div class="field-group"><label>技能id</label><input type="number" value="${skill.skillId}" data-field="skillId" data-si="${si}" /></div>
+                    <div class="field-group"><label>技能名</label><input type="text" value="${skill.name}" data-field="skillName" data-si="${si}" /></div>
+                    <div class="field-group"><label>技能序号</label><input type="number" value="${skill.skillGroupIndex}" data-field="skillGroupIndex" data-si="${si}" /></div>
+                </div>
+                <div class="flex-row three-col">
+                    <div class="field-group"><label>spineDir</label><input type="text" value="${spineDirVal}" placeholder="${spineDirPlaceholder}" data-field="skillSpineDir" data-si="${si}" /></div>
+                    <div class="field-group"><label>spineName</label><input type="text" value="${spineNameVal}" placeholder="${spineNamePlaceholder}" data-field="skillSpineName" data-si="${si}" /></div>
+                    <div class="field-group"><label>aniName</label><input type="text" value="${aniNameVal}" placeholder="${aniNamePlaceholder}" data-field="skillAniName" data-si="${si}" /></div>
+                    <div class="field-group"><label>hitEffect</label><input type="text" value="${hitEffectVal}" placeholder="${hitEffectPlaceholder}" data-field="skillHitEffect" data-si="${si}" /></div>
+                </div>
+                <div class="flex-row three-col">
+                    <div class="field-group"><label>hitAni</label><input type="text" value="${hitAniVal}" placeholder="${hitAniPlaceholder}" data-field="skillHitAni" data-si="${si}" /></div>
+                    <div class="field-group"><label>bgmVolume</label><input type="number" step="0.1" value="${bgmVal}" placeholder="${bgmPlaceholder}" data-field="skillBgmVolume" data-si="${si}" /></div>
+                    <div class="field-group"><label>effectShowType</label><input type="number" value="${effectShowTypeVal}" placeholder="${effectShowTypePlaceholder}" data-field="skillEffectShowType" data-si="${si}" /></div>
+                </div>
+                <div><button class="btn btn-sm btn-secondary add-skill-action" data-si="${si}">+ 添加效果</button></div>
+                <div>${actionsHtml}</div>
+            </div>
+        `;
+    });
+    skillsHtml += `</div></div>`;
+    html += skillsHtml;
+
+    // ---- 天赋列表 ----
+    let abilitiesHtml = `
+        <div class="fold-group">
+            <div class="fold-header" data-target="abilityList_${idx}"><span class="label">✨ 天赋列表 (${enemy.abilityList.length})</span><span class="text-muted">点击折叠</span></div>
+            <div class="fold-body" id="abilityList_${idx}">
+                <button class="btn btn-sm btn-success add-ability-btn" style="margin-bottom:10px;">+ 添加天赋</button>
+    `;
+    enemy.abilityList.forEach((ability, ai) => {
+        const condHtml = (ability.conditionList || []).map((cond, ci) => {
+            const condTypeInput = buildEnumInput(cond.conditionType, 'conditionType', `data-ai="${ai}" data-ci="${ci}"`, '', null, `enemy-${idx}-ability-${ai}-condition-${ci}-type`);
+            const condValueHtml = buildConditionValueInputs(cond, ci, ai, idx);
+            return `
+            <div class="list-item" style="background:#0a1a2a;">
+                <button class="remove-btn" data-action="remove-ability-condition" data-ai="${ai}" data-ci="${ci}">×</button>
+                <div class="flex-row">
+                    <div class="field-group" style="flex: 0 0 calc(25% - 8px); min-width: 130px;">
+                        <label>conditionGroup</label>
+                        <input type="number" value="${cond.conditionGroup}" placeholder="不用填写" data-field="condGroup" data-ai="${ai}" data-ci="${ci}" />
+                    </div>
+                    <div class="field-group" style="flex: 0 0 calc(25% - 8px); min-width: 130px; visibility: hidden;"></div>
+                    <div class="field-group" style="flex: 0 0 calc(25% - 8px); min-width: 130px; visibility: hidden;"></div>
+                    <div class="field-group" style="flex: 0 0 calc(25% - 8px); min-width: 130px; visibility: hidden;"></div>
+                </div>
+                <div class="flex-row three-col">
+                    <div class="field-group"><label>conditionType(前置条件类型)</label>${condTypeInput}</div>
+                    <div class="field-group" style="flex: 2; min-width: 300px;"><label>conditionValue(前置条件参数)</label>${condValueHtml}</div>
+                </div>
+            </div>
+            `;
+        }).join('');
+
+        const actionsHtml2 = (ability.actionList || []).map((action, ai2) => buildActionHTML(action, 'ability', ai, ai2, idx)).join('');
+
+        const triggerTypeInput = buildEnumInput(ability.triggerType, 'triggerType', `data-ai="${ai}"`, '', null, `enemy-${idx}-ability-${ai}-triggerType`);
+        let triggerValueHtml;
+        if (shouldUseAttributeForTrigger(ability.triggerType)) {
+            triggerValueHtml = buildEnumInput(ability.triggerValue, 'abTriggerValue', `data-ai="${ai}"`, '', 'attribute', `enemy-${idx}-ability-${ai}-triggerValue`);
+        } else if (shouldUseBuffIdForTrigger(ability.triggerType)) {
+            triggerValueHtml = buildEnumInput(ability.triggerValue, 'abTriggerValue', `data-ai="${ai}"`, '', 'buffId', `enemy-${idx}-ability-${ai}-triggerValue`);
+        } else {
+            triggerValueHtml = `<input type="text" value="${ability.triggerValue}" data-field="abTriggerValue" data-ai="${ai}" />`;
+        }
+
+        abilitiesHtml += `
+            <div class="fold-group" style="border-color:#3a4a6a; background:#0a1525;">
+                <div class="fold-header" data-target="abilityFold_${idx}_${ai}" style="background:#1a2a4a;">
+                    <span class="label">🔹 天赋 ${ai+1} (ID: ${ability.abilityId}) — ${ability.name || '未命名'}</span>
+                    <span class="text-muted">点击折叠</span>
+                </div>
+                <div class="fold-body" id="abilityFold_${idx}_${ai}">
+                    <button class="remove-btn" data-action="remove-ability" data-ai="${ai}" style="position:relative; float:right; margin-bottom:8px;">×</button>
+                    <div class="flex-row three-col">
+                        <div class="field-group"><label>abilityId(天赋ID)</label><input type="number" value="${ability.abilityId}" data-field="abId" data-ai="${ai}" /></div>
+                        <div class="field-group"><label>name(天赋名)</label><input type="text" value="${ability.name}" data-field="abName" data-ai="${ai}" /></div>
+                    </div>
+                    <div class="flex-row">
+                        <div class="field-group" style="flex: 1; min-width: 200px;">
+                            <label>shortName</label>
+                            <input type="text" value="${ability.shortName}" data-field="abShortName" data-ai="${ai}" />
+                        </div>
+                    </div>
+                    <div class="flex-row three-col">
+                        <div class="field-group"><label>triggerType(触发类型)</label>${triggerTypeInput}</div>
+                        <div class="field-group"><label>triggerValue(触发参数)</label>${triggerValueHtml}</div>
+                    </div>
+                    <div class="flex-row">
+                        <div class="field-group" style="flex: 0 0 calc(25% - 8px); min-width: 130px;">
+                            <label>invokeLimit(次数上限)</label>
+                            <input type="number" value="${ability.invokeLimitCount}" data-field="abInvokeLimit" data-ai="${ai}" />
+                        </div>
+                        <div class="field-group" style="flex: 0 0 calc(25% - 8px); min-width: 130px; visibility: hidden;"></div>
+                        <div class="field-group" style="flex: 0 0 calc(25% - 8px); min-width: 130px; visibility: hidden;"></div>
+                        <div class="field-group" style="flex: 0 0 calc(25% - 8px); min-width: 130px; visibility: hidden;"></div>
+                    </div>
+                    <div><button class="btn btn-sm btn-secondary add-ability-condition" data-ai="${ai}">+ 添加条件</button></div>
+                    <div>${condHtml}</div>
+                    <div><button class="btn btn-sm btn-secondary add-ability-action" data-ai="${ai}">+ 添加效果</button></div>
+                    <div>${actionsHtml2}</div>
+                </div>
+            </div>
+        `;
+    });
+    abilitiesHtml += `</div></div>`;
+    html += abilitiesHtml;
+
+    // ---- AI 列表 ----
+    let aiHtml = `
+        <div class="fold-group">
+            <div class="fold-header" data-target="aiList_${idx}"><span class="label">🤖 AI 列表 (${enemy.enemyAIList.length})</span><span class="text-muted">点击折叠</span></div>
+            <div class="fold-body" id="aiList_${idx}">
+                <button class="btn btn-sm btn-success add-ai-btn" data-idx="${idx}" style="margin-bottom:10px;">+ 添加 AI</button>
+    `;
+    enemy.enemyAIList.forEach((aiItem, aiIdx) => {
+        aiHtml += `
+            <div class="list-item">
+                <button class="remove-btn" data-action="remove-ai" data-aiidx="${aiIdx}" data-idx="${idx}">×</button>
+                <div class="flex-row">
+                    <div class="field-group"><label>priority(优先级)</label><input type="number" value="${aiItem.priority}" data-field="aiPriority" data-aiidx="${aiIdx}" data-idx="${idx}" /></div>
+                    <div class="field-group"><label>actionType(行动类型)</label><input type="number" value="${aiItem.actionType}" data-field="aiActionType" data-aiidx="${aiIdx}" data-idx="${idx}" /></div>
+                    <div class="field-group"><label>rate(权重)</label><input type="number" value="${aiItem.rate}" data-field="aiRate" data-aiidx="${aiIdx}" data-idx="${idx}" /></div>
+                </div>
+                <div class="flex-row">
+                    <div class="field-group"><label>actionCount(行动轮次)</label><input type="number" value="${aiItem.actionCount}" data-field="aiActionCount" data-aiidx="${aiIdx}" data-idx="${idx}" /></div>
+                    <div class="field-group"><label>beatcost(强击消耗)</label><input type="number" value="${aiItem.beatcost}" data-field="aiBeatcost" data-aiidx="${aiIdx}" data-idx="${idx}" /></div>
+                    <div class="field-group"><label>actionContinue(继续行动)</label><input type="number" value="${aiItem.actionContinue}" data-field="aiContinue" data-aiidx="${aiIdx}" data-idx="${idx}" /></div>
+                    <div class="field-group"><label>skillContinue(skill继续行动)</label><input type="number" value="${aiItem.skillContinue}" data-field="aiSkillContinue" data-aiidx="${aiIdx}" data-idx="${idx}" /></div>
+                </div>
+                <div class="ai-divider"></div>
+                <div class="ai-auto-fold">
+                    <div class="fold-header" data-target="aiAutoFold_${idx}_${aiIdx}">
+                        <span class="label">📎 自动填充参数（点击展开）</span>
+                        <span class="text-muted" style="font-size:0.7rem;">▶</span>
+                    </div>
+                    <div class="fold-body collapsed" id="aiAutoFold_${idx}_${aiIdx}">
+                        <div class="flex-row">
+                            <div class="field-group"><label>conditionHpFrom</label><input type="number" value="${aiItem.conditionHpFrom}" data-field="aiConditionHpFrom" data-aiidx="${aiIdx}" data-idx="${idx}" /></div>
+                            <div class="field-group"><label>conditionHpTo</label><input type="number" value="${aiItem.conditionHpTo}" data-field="aiConditionHpTo" data-aiidx="${aiIdx}" data-idx="${idx}" /></div>
+                        </div>
+                        <div class="flex-row">
+                            <div class="field-group"><label>conditionPlayerAttribute</label><input type="text" value="${aiItem.conditionPlayerAttribute}" data-field="aiConditionPlayerAttribute" data-aiidx="${aiIdx}" data-idx="${idx}" /></div>
+                            <div class="field-group"><label>conditionEnemyAbnormal</label><input type="text" value="${aiItem.conditionEnemyAbnormal}" data-field="aiConditionEnemyAbnormal" data-aiidx="${aiIdx}" data-idx="${idx}" /></div>
+                        </div>
+                        <div class="flex-row">
+                            <div class="field-group"><label>turnType</label><input type="number" value="${aiItem.turnType}" data-field="aiTurnType" data-aiidx="${aiIdx}" data-idx="${idx}" /></div>
+                            <div class="field-group"><label>turnValue</label><input type="number" value="${aiItem.turnValue}" data-field="aiTurnValue" data-aiidx="${aiIdx}" data-idx="${idx}" /></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    aiHtml += `</div></div>`;
+    html += aiHtml;
+
+    return html;
+}
+
+// ============= 构建狂暴数据 HTML =============
+function buildRageHTML(enemy, idx) {
+    const rageList = enemy.rageDataList || [];
+    let html = `
+        <div class="fold-group" style="margin-top:10px;">
+            <div class="fold-header" data-target="rageList_${idx}">
+                <span class="label">💢 狂暴数据 (Rage) — ${rageList.length} 个阶段</span>
+                <span class="text-muted">点击折叠</span>
+            </div>
+            <div class="fold-body" id="rageList_${idx}">
+                <button class="btn btn-sm btn-success add-rage-btn" style="margin-bottom:10px;">+ 添加狂暴阶段</button>
+    `;
+    if (rageList.length === 0) {
+        html += `<div style="color:#666; font-style:italic; padding:8px 0;">暂无狂暴阶段</div>`;
+    } else {
+        rageList.forEach((rage, ri) => {
+            html += `
+                <div class="rage-entry" data-rage-index="${ri}">
+                    <button class="remove-btn" data-rage-index="${ri}" data-enemy-idx="${idx}">×</button>
+                    <div class="flex-row" style="gap:8px;">
+                        <div class="field-group">
+                            <label>Boss ID</label>
+                            <input type="number" value="${rage.bossId || 0}" data-rage-field="bossId" data-rage-index="${ri}" data-enemy-idx="${idx}" />
+                            <button type="button" class="rage-help-btn" data-label="Boss ID" data-help="Boss 的唯一标识 ID">?</button>
+                        </div>
+                        <div class="field-group">
+                            <label>退出狂暴血量</label>
+                            <input type="number" value="${rage.rageFrom || 0}" data-rage-field="rageFrom" data-rage-index="${ri}" data-enemy-idx="${idx}" />
+                            <button type="button" class="rage-help-btn" data-label="退出狂暴血量" data-help="填入低于该血量时退出狂暴">?</button>
+                        </div>
+                        <div class="field-group">
+                            <label>触发狂暴血量</label>
+                            <input type="number" value="${rage.rageTo || 0}" data-rage-field="rageTo" data-rage-index="${ri}" data-enemy-idx="${idx}" />
+                            <button type="button" class="rage-help-btn" data-label="触发狂暴血量" data-help="填入低于该血量时触发狂暴">?</button>
+                        </div>
+                    </div>
+                    <div class="flex-row" style="gap:8px;">
+                        <div class="field-group">
+                            <label>狂暴攻击力</label>
+                            <input type="number" value="${rage.rageAtk || 100}" data-rage-field="rageAtk" data-rage-index="${ri}" data-enemy-idx="${idx}" />
+                            <button type="button" class="rage-help-btn" data-label="狂暴攻击力" data-help="填入150为攻击变为1.5倍">?</button>
+                        </div>
+                        <div class="field-group">
+                            <label>狂暴防御力</label>
+                            <input type="number" value="${rage.rageDef || 100}" data-rage-field="rageDef" data-rage-index="${ri}" data-enemy-idx="${idx}" />
+                            <button type="button" class="rage-help-btn" data-label="狂暴防御力" data-help="填入150为防御变为1.5倍">?</button>
+                        </div>
+                        <div class="field-group">
+                            <label>狂暴skillid</label>
+                            <input type="number" value="${rage.rageSkillIndex || 0}" data-rage-field="rageSkillIndex" data-rage-index="${ri}" data-enemy-idx="${idx}" />
+                            <button type="button" class="rage-help-btn" data-label="狂暴skillid" data-help="填入狂暴时使用的skill的id。填0则随机使用">?</button>
+                        </div>
+                    </div>
+                    <!-- 隐藏字段（默认值） -->
+                    <input type="hidden" data-rage-field="beatId" value="${rage.beatId || 0}" />
+                    <input type="hidden" data-rage-field="rageAnimId" value="${rage.rageAnimId || 0}" />
+                    <input type="hidden" data-rage-field="gaugeColorId" value="${rage.gaugeColorId || 0}" />
+                </div>
+            `;
+        });
+    }
+    html += `</div></div>`;
+    return html;
+}
+
+// ============= 绑定子列表 =============
+function bindSubAddButtons(body, enemyIdx) {
+    body.querySelectorAll('.add-skill-action').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const si = parseInt(btn.dataset.si);
+            const enemy = enemies[enemyIdx];
+            const skill = enemy.skillAttackList[si];
+            const newAction = {
+                skillId: skill.skillId,
+                index: skill.actionList.length + 1,
+                shortText: "",
+                actionType: 101,
+                effectType: 2,
+                effectValue: 100,
+                effectLimit: 0,
+                effectConditionType: 0,
+                effectConditionValue: "",
+                occurrenceRate: 100,
+                successRate: 100,
+                targetType: 2,
+                targetValue: "0",
+                endType: 0,
+                endValue: "0"
+            };
+            skill.actionList.push(newAction);
+            renderEnemies();
+        });
+    });
+    body.querySelectorAll('[data-action="remove-skill-action"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const si = parseInt(btn.dataset.si);
+            const ai = parseInt(btn.dataset.ai);
+            enemies[enemyIdx].skillAttackList[si].actionList.splice(ai, 1);
+            renderEnemies();
+        });
+    });
+    body.querySelectorAll('[data-action="remove-skill"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const si = parseInt(btn.dataset.si);
+            enemies[enemyIdx].skillAttackList.splice(si, 1);
+            renderEnemies();
+        });
+    });
+
+    body.querySelectorAll('.add-ability-condition').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const ai = parseInt(btn.dataset.ai);
+            const enemy = enemies[enemyIdx];
+            const ability = enemy.abilityList[ai];
+            if (!ability.conditionList) ability.conditionList = [];
+            ability.conditionList.push({ abilityId: ability.abilityId, conditionGroup: 1, conditionType: 121, conditionValue: "0:0" });
+            renderEnemies();
+        });
+    });
+    body.querySelectorAll('[data-action="remove-ability-condition"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const ai = parseInt(btn.dataset.ai);
+            const ci = parseInt(btn.dataset.ci);
+            enemies[enemyIdx].abilityList[ai].conditionList.splice(ci, 1);
+            renderEnemies();
+        });
+    });
+    body.querySelectorAll('.add-ability-action').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const ai = parseInt(btn.dataset.ai);
+            const enemy = enemies[enemyIdx];
+            const ability = enemy.abilityList[ai];
+            if (!ability.actionList) ability.actionList = [];
+            ability.actionList.push({
+                abilityId: ability.abilityId,
+                index: ability.actionList.length + 1,
+                text: "",
+                shortText: "",
+                actionType: 101,
+                effectType: 2,
+                effectValue: 100,
+                effectLimit: 0,
+                effectConditionType: 0,
+                effectConditionValue: "",
+                occurrenceRate: 100,
+                successRate: 100,
+                targetType: 2,
+                targetValue: "0",
+                endType: 0,
+                endValue: "0"
+            });
+            renderEnemies();
+        });
+    });
+    body.querySelectorAll('[data-action="remove-ability-action"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const ai = parseInt(btn.dataset.ai);
+            const ai2 = parseInt(btn.dataset.ai2);
+            enemies[enemyIdx].abilityList[ai].actionList.splice(ai2, 1);
+            renderEnemies();
+        });
+    });
+    body.querySelectorAll('[data-action="remove-ability"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const ai = parseInt(btn.dataset.ai);
+            enemies[enemyIdx].abilityList.splice(ai, 1);
+            renderEnemies();
+        });
+    });
+}
+
+document.addEventListener('click', function(e) {
+    if (e.target.matches('.add-ai-btn')) {
+        const idx = parseInt(e.target.dataset.idx);
+        if (isNaN(idx)) return;
+        const enemy = enemies[idx];
+        if (!enemy) return;
+        const newAI = {
+            enemyAI: enemy.enemyId,
+            priority: enemy.enemyAIList.length + 1,
+            conditionHpFrom: 0,
+            conditionHpTo: 100,
+            conditionPlayerHpTotal: 0,
+            conditionPlayerAtkTotal: 0,
+            conditionPlayerDefTotal: 0,
+            conditionPlayerAttribute: "",
+            conditionEnemyAbnormal: "",
+            actionCount: 0,
+            actionType: 1,
+            turnType: 0,
+            turnValue: 0,
+            index: 0,
+            rate: 1000,
+            actionContinue: 1,
+            beatcost: 1,
+            skillContinue: 0
+        };
+        enemy.enemyAIList.push(newAI);
+        renderEnemies();
+        e.preventDefault();
+    }
+
+    if (e.target.matches('[data-action="remove-ai"]')) {
+        const idx = parseInt(e.target.dataset.idx);
+        const aiidx = parseInt(e.target.dataset.aiidx);
+        if (isNaN(idx) || isNaN(aiidx)) return;
+        enemies[idx].enemyAIList.splice(aiidx, 1);
+        renderEnemies();
+        e.preventDefault();
+    }
+
+    if (e.target.matches('.ai-auto-fold .fold-header')) {
+        const targetId = e.target.dataset.target;
+        if (targetId) {
+            const target = document.getElementById(targetId);
+            if (target) {
+                target.classList.toggle('collapsed');
+                const arrow = e.target.querySelector('.text-muted');
+                if (arrow) {
+                    arrow.textContent = target.classList.contains('collapsed') ? '▶' : '▼';
+                }
+            }
+        }
+        e.preventDefault();
+    }
+});
+
+// ============= 更新字段 =============
+function updateEnemyField(enemyIdx, field, el) {
+    const enemy = enemies[enemyIdx];
+    let val = el.value;
+    if (el.dataset && el.dataset.realValue !== undefined && el.dataset.realValue !== '') {
+        val = el.dataset.realValue;
+    } else {
+        const numMatch = val.match(/^(\d+)/);
+        if (numMatch) {
+            val = numMatch[1];
+        }
+    }
+    if (el.type === 'checkbox') {
+        val = el.checked;
+    }
+
+    // ---- 特殊处理 ability 的 triggerType 和 condition 相关字段 ----
+    const ai = parseInt(el.dataset.ai);
+    if (!isNaN(ai)) {
+        const ability = enemy.abilityList[ai];
+        if (ability) {
+            if (field === 'triggerType') {
+                ability.triggerType = parseInt(val) || 0;
+                renderEnemies();
+                updatePreview();
+                return;
+            }
+            const ci = parseInt(el.dataset.ci);
+            if (!isNaN(ci) && ability.conditionList && ability.conditionList[ci]) {
+                const cond = ability.conditionList[ci];
+                if (field === 'conditionType') {
+                    cond.conditionType = parseInt(val) || 0;
+                    renderEnemies();
+                    updatePreview();
+                    return;
+                } else if (field === 'condValue') {
+                    cond.conditionValue = val;
+                    renderEnemies();
+                    updatePreview();
+                    return;
+                } else if (field === 'condGroup') {
+                    cond.conditionGroup = parseInt(val) || 0;
+                    renderEnemies();
+                    updatePreview();
+                    return;
+                }
+            }
+        }
+    }
+
+    // ---- 护盾抵抗系数（结构性） ----
+    if (field.startsWith('armorregister_')) {
+        const idx = parseInt(field.split('_')[1]);
+        const vals = enemy.armorregister ? enemy.armorregister.split(',').map(v => parseInt(v.trim()) || 50) : [50,50,50,50,50,50,50];
+        while (vals.length < 7) vals.push(50);
+        vals[idx] = parseInt(val) || 0;
+        enemy.armorregister = vals.join(',');
+        renderEnemies();
+        updatePreview();
+        return;
+    }
+
+    // ---- 耐性（非结构性） ----
+    if (field.startsWith('resist_')) {
+        const key = field.replace('resist_', '');
+        if (key === 'darknessAll' || key === 'darkness') {
+            enemy.resist.darkness = parseInt(val) || 0;
+        } else if (key === 'deadlyPoison') {
+            enemy.resist.deadlyPoison = parseInt(val) || 0;
+        } else {
+            enemy.resist[key] = parseInt(val) || 0;
+        }
+        updatePreview();
+        return;
+    }
+
+    // ---- 简单字段（非结构性） ----
+    const simpleFields = ['name', 'attribute', 'subAttribute', 'hp', 'atk', 'def', 'armorHp', 'addArmorHp', 'unisonAddDamage', 'beatlimit'];
+    if (simpleFields.includes(field)) {
+        if (field === 'attribute' || field === 'subAttribute') enemy[field] = parseInt(val);
+        else if (['hp','atk','def','armorHp','addArmorHp','unisonAddDamage','beatlimit'].includes(field)) enemy[field] = parseFloat(val) || 0;
+        else enemy[field] = val;
+        updatePreview();
+        return;
+    }
+
+    // ---- isBoss（结构性） ----
+    if (field === 'isBoss') {
+        enemy.isBoss = val;
+        renderEnemies();
+        updatePreview();
+        return;
+    }
+
+    if (['normalAttackId', 'normalEffectShowType', 'normalEffectShowValue'].includes(field)) {
+        return;
+    }
+
+    // ---- skill 相关 ----
+    if (field.startsWith('skill')) {
+        const si = parseInt(el.dataset.si);
+        const skill = enemy.skillAttackList[si];
+        if (!skill) return;
+        const map = {
+            'skillId':'skillId','skillName':'name','skillEffectShowType':'effectShowType',
+            'skillGroupIndex':'skillGroupIndex','skillSpineDir':'spineDirectoryPath',
+            'skillSpineName':'spineName','skillAniName':'aniName','skillHitEffect':'hitEffectName',
+            'skillHitAni':'hitEffectAniName','skillBgmVolume':'bgmVolumeAmount'
+        };
+        const key = map[field];
+        if (key) {
+            if (['skillId','effectShowType','skillGroupIndex'].includes(field)) {
+                skill[key] = parseInt(val) || 0;
+            } else if (field === 'skillBgmVolume') {
+                skill[key] = val === '' ? null : parseFloat(val) || 0;
+            } else {
+                skill[key] = val === '' ? null : val;
+            }
+        }
+        updatePreview();
+        return;
+    }
+
+    // ---- action 或 abAction 字段 ----
+    if (field.startsWith('action') || field.startsWith('abAction')) {
+        const isAb = field.startsWith('abAction');
+        const si = parseInt(el.dataset.si) || 0;
+        const ai = parseInt(el.dataset.ai) || 0;
+        const ai2 = parseInt(el.dataset.ai2) || 0;
+        let action;
+        if (isAb) {
+            const ability = enemy.abilityList[ai];
+            if (!ability) return;
+            action = ability.actionList?.[ai2];
+        } else {
+            const skill = enemy.skillAttackList[si];
+            if (!skill) return;
+            action = skill.actionList[ai];
+        }
+        if (!action) return;
+
+        let key = field.replace(/^(action|abAction)/, '');
+        const map = {
+            'Index':'index','Type':'actionType','EffectType':'effectType','EffectValue':'effectValue',
+            'EffectLimit':'effectLimit','EffectConditionType':'effectConditionType','EffectConditionValue':'effectConditionValue',
+            'Occurrence':'occurrenceRate','Success':'successRate','TargetType':'targetType',
+            'TargetValue':'targetValue','EndType':'endType','EndValue':'endValue','ShortText':'shortText'
+        };
+        const prop = map[key];
+        if (prop) {
+            const typeFields = ['actionType','effectType','effectConditionType','targetType','endType'];
+            if (typeFields.includes(prop)) {
+                action[prop] = parseInt(val) || 0;
+                renderEnemies();
+                updatePreview();
+                return;
+            } else {
+                if (['index','effectValue','effectLimit','occurrenceRate','successRate','endValue','targetValue'].includes(prop)) {
+                    action[prop] = parseInt(val) || 0;
+                } else {
+                    action[prop] = val;
+                }
+                updatePreview();
+                return;
+            }
+        }
+    }
+
+    // ---- ability 自身字段 ----
+    if (field.startsWith('ab') && !field.startsWith('abAction')) {
+        const ai = parseInt(el.dataset.ai);
+        const ability = enemy.abilityList[ai];
+        if (!ability) return;
+        const map = {
+            'abId':'abilityId','abName':'name','abShortName':'shortName',
+            'abTriggerType':'triggerType','abTriggerValue':'triggerValue','abInvokeLimit':'invokeLimitCount'
+        };
+        const key = map[field];
+        if (key) {
+            if (['abilityId','triggerType','invokeLimitCount'].includes(field)) {
+                ability[key] = parseInt(val) || 0;
+            } else {
+                ability[key] = val;
+            }
+        }
+        updatePreview();
+        return;
+    }
+
+    // ---- AI 字段 ----
+    if (field.startsWith('ai')) {
+        const aiIdx = parseInt(el.dataset.aiidx);
+        const aiItem = enemy.enemyAIList[aiIdx];
+        if (!aiItem) return;
+        const amap = {
+            'aiPriority':'priority',
+            'aiActionCount':'actionCount',
+            'aiActionType':'actionType',
+            'aiRate':'rate',
+            'aiContinue':'actionContinue',
+            'aiBeatcost':'beatcost',
+            'aiSkillContinue':'skillContinue',
+            'aiTurnType':'turnType',
+            'aiTurnValue':'turnValue',
+            'aiConditionHpFrom':'conditionHpFrom',
+            'aiConditionHpTo':'conditionHpTo',
+            'aiConditionPlayerAttribute':'conditionPlayerAttribute',
+            'aiConditionEnemyAbnormal':'conditionEnemyAbnormal'
+        };
+        const akey = amap[field];
+        if (akey) {
+            if (['priority','actionCount','actionType','rate','actionContinue','beatcost','skillContinue','turnType','turnValue','conditionHpFrom','conditionHpTo'].includes(field)) {
+                aiItem[akey] = parseInt(val) || 0;
+            } else {
+                aiItem[akey] = val;
+            }
+        }
+        updatePreview();
+        return;
+    }
+
+    updatePreview();
+}
+
+function updatePreview() {
+    const data = buildFullData();
+    document.getElementById('outputArea').textContent = JSON.stringify(data, null, 2);
+}
+
+function buildFullData() {
+    const stageId = parseInt(document.getElementById('stageId').value) || 0;
+    const stagename = document.getElementById('stagename').value || '';
+    const eventid = parseInt(document.getElementById('eventid').value) || 10;
+
+    const enemiesClean = enemies.map(enemy => {
+        const e = { ...enemy };
+        e.normalAttack = { ...enemy.normalAttack };
+        e.skillAttackList = enemy.skillAttackList.map(skill => {
+            const s = { ...skill };
+            if (s.spineDirectoryPath === '') s.spineDirectoryPath = null;
+            if (s.spineName === '') s.spineName = null;
+            if (s.aniName === '') s.aniName = null;
+            if (s.hitEffectName === '') s.hitEffectName = null;
+            if (s.hitEffectAniName === '') s.hitEffectAniName = null;
+            if (s.bgmVolumeAmount === '') s.bgmVolumeAmount = null;
+            if (s.effectShowType === '') s.effectShowType = null;
+            s.actionList = skill.actionList.map(a => ({ ...a }));
+            return s;
+        });
+        e.abilityList = enemy.abilityList.map(ab => ({ ...ab, conditionList: (ab.conditionList||[]).map(c=>({...c})), actionList: (ab.actionList||[]).map(a=>({...a})) }));
+        e.resist = {
+            resistId:0, statusDebuff:0,
+            poison: e.resist.poison||0, paralysis: e.resist.paralysis||0, stun:0, sleep:0,
+            confuse: e.resist.confuse||0, darkness: e.resist.darkness||0, addDebuffTurn:0, zombie:0,
+            curse:0, deathSentence:0, sealSkill: e.resist.sealSkill||0, sealPlusSkillRate:0,
+            deadlyPoison: e.resist.deadlyPoison!==undefined?e.resist.deadlyPoison:0, erosion: e.resist.erosion||0
+        };
+        e.enemyAIList = enemy.enemyAIList.map(ai => ({ ...ai }));
+        e.rageDataList = enemy.rageDataList || [];
+        return e;
+    });
+
+    return {
+        stageId,
+        stagename,
+        eventid,
+        waves: [{ wave: 1, enemies: enemiesClean }]
+    };
+}
+
+document.getElementById('addEnemyBtn').addEventListener('click', () => {
+    const newEnemy = createDefaultEnemy();
+    while (enemies.some(e => e.enemyId === newEnemy.enemyId)) newEnemy.enemyId++;
+    enemies.push(newEnemy);
+    renderEnemies();
+    updatePreview();
+});
+
+function compactArrayInJSON(json, key) {
+    const regex = new RegExp(`"${key}":\\s*\\[`);
+    const match = json.match(regex);
+    if (!match) return json;
+    const startIdx = match.index;
+    const startBracketIdx = startIdx + match[0].length - 1;
+    let depth = 1;
+    let endIdx = startBracketIdx + 1;
+    while (depth > 0 && endIdx < json.length) {
+        const ch = json[endIdx];
+        if (ch === '[') depth++;
+        else if (ch === ']') depth--;
+        endIdx++;
+    }
+    if (depth !== 0) return json;
+    const arrayContent = json.substring(startBracketIdx, endIdx);
+    let parsed;
+    try {
+        parsed = JSON.parse(arrayContent);
+    } catch (e) {
+        return json;
+    }
+    if (!Array.isArray(parsed)) return json;
+    const compactItems = parsed.map(item => JSON.stringify(item));
+    let indent = 0;
+    for (let i = startBracketIdx - 1; i >= 0; i--) {
+        if (json[i] === '\n') break;
+        if (json[i] === ' ') indent++;
+        else break;
+    }
+    const itemIndent = ' '.repeat(indent + 2);
+    const newArray = '[\n' + compactItems.map(item => itemIndent + item).join(',\n') + '\n' + ' '.repeat(indent) + ']';
+    return json.substring(0, startBracketIdx) + newArray + json.substring(endIdx);
+}
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+    const data = buildFullData();
+    let json = JSON.stringify(data, null, 2);
+    json = compactArrayInJSON(json, 'skillAttackList');
+    json = compactArrayInJSON(json, 'abilityList');
+    json = compactArrayInJSON(json, 'enemyAIList');
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `boss_${data.stageId}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+});
+
+document.getElementById('importBtn').addEventListener('click', () => {
+    document.getElementById('fileInput').click();
+});
+document.getElementById('fileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        try {
+            const data = JSON.parse(ev.target.result);
+            if (data.stageId !== undefined) {
+                document.getElementById('stageId').value = data.stageId;
+                document.getElementById('stagename').value = data.stagename || '';
+                document.getElementById('eventid').value = data.eventid || 10;
+                if (data.waves && data.waves.length > 0 && data.waves[0].enemies) {
+                    enemies = data.waves[0].enemies.map(e => {
+                        if (!e.normalAttack) e.normalAttack = { normalAttackId: 0, effectShowType: 2, effectShowValue: 0 };
+                        if (!e.resist) e.resist = { resistId:0, statusDebuff:0, poison:0, paralysis:0, stun:0, sleep:0, confuse:0, darkness:0, addDebuffTurn:0, zombie:0, curse:0, deathSentence:0, sealSkill:0, sealPlusSkillRate:0, erosion:0 };
+                        if (!e.enemyAIList) e.enemyAIList = [];
+                        if (!e.abilityList) e.abilityList = [];
+                        if (!e.skillAttackList) e.skillAttackList = [];
+                        if (e.skillAttackList) {
+                            e.skillAttackList.forEach(s => {
+                                if (s.spineDirectoryPath === undefined || s.spineDirectoryPath === null) s.spineDirectoryPath = null;
+                                if (s.spineName === undefined || s.spineName === null) s.spineName = null;
+                                if (s.aniName === undefined || s.aniName === null) s.aniName = null;
+                                if (s.hitEffectName === undefined || s.hitEffectName === null) s.hitEffectName = null;
+                                if (s.hitEffectAniName === undefined || s.hitEffectAniName === null) s.hitEffectAniName = null;
+                                if (s.bgmVolumeAmount === undefined || s.bgmVolumeAmount === null) s.bgmVolumeAmount = null;
+                                if (s.effectShowType === undefined || s.effectShowType === null) s.effectShowType = null;
+                            });
+                        }
+                        if (!e.rageDataList) e.rageDataList = [];
+                        return e;
+                    });
+                    let maxId = 0;
+                    enemies.forEach(e => { if (e.enemyId > maxId) maxId = e.enemyId; });
+                    enemyIdCounter = maxId + 1;
+                    renderEnemies();
+                    updatePreview();
+                }
+            }
+        } catch(err) { alert('导入失败：' + err.message); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+});
+
+document.getElementById('clearAllBtn').addEventListener('click', () => {
+    if (confirm('清空所有敌人？')) {
+        enemies = [];
+        renderEnemies();
+        updatePreview();
+    }
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        setTimeout(setupEnumPickers, 50);
+    });
+});
+
+function initDemo() {
+    const demo = {
+        enemyId: 2005,
+        name: "告死天・眩耀",
+        attribute: 5,
+        subAttribute: 0,
+        hp: 50000000000,
+        atk: 8230,
+        def: 8350,
+        armorHp: 100000,
+        addArmorHp: 1000000,
+        armorregister: "50,50,50,50,50,70,300",
+        unisonAddDamage: 1000000,
+        beatlimit: 1,
+        normalAttack: { normalAttackId: 200501, effectShowType: 2, effectShowValue: 0 },
+        skillAttackList: [],
+        abilityList: [],
+        resist: {
+            resistId:0, statusDebuff:0,
+            poison:9999, paralysis:9999, stun:9999, sleep:9999,
+            confuse:9999, darkness:9999, addDebuffTurn:9999, zombie:9999,
+            curse:9999, deathSentence:9999, sealSkill:9999, sealPlusSkillRate:9999,
+            deadlyPoison:9999, erosion:9999
+        },
+        enemyAIList: [],
+        isBoss: false,
+        rageDataList: []
+    };
+    enemies.push(demo);
+    enemyIdCounter = 2006;
+    renderEnemies();
+    updatePreview();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    initDemo();
+    setTimeout(setupEnumPickers, 100);
+});
+
+const observer = new MutationObserver(function(mutations) {
+    for (const mutation of mutations) {
+        if (mutation.addedNodes.length > 0) {
+            const wrappers = document.querySelectorAll('.enum-wrapper:not([data-initialized="true"])');
+            if (wrappers.length > 0) {
+                setupEnumPickers();
+            }
+            break;
+        }
+    }
+});
+observer.observe(document.body, { childList: true, subtree: true });
+</script>
+</body>
+</html>
