@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boss 参数编辑器</title>
     <style>
-        /* 样式部分与之前保持一致，仅增加了条件拆分框的样式优化 */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background: #1a1a2e;
@@ -462,6 +461,77 @@
         .cond-parts-container .cond-part input.short { width: 40px; }
         .cond-parts-container .cond-part input.medium { width: 60px; }
         .cond-parts-container .cond-part input.long { width: 80px; }
+
+        /* 狂暴数据样式 */
+        .rage-entry {
+            background: #0a1a2a;
+            border: 1px solid #2a3a5a;
+            border-radius: 6px;
+            padding: 12px 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .rage-entry .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #c0392b;
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 26px;
+            text-align: center;
+            font-weight: 700;
+            z-index: 2;
+        }
+        .rage-entry .remove-btn:hover { background: #e74c3c; }
+        .rage-entry .field-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 0 0 calc(33.33% - 10px);
+            min-width: 120px;
+        }
+        .rage-entry .field-group label {
+            font-size: 0.8rem;
+            color: #8a9aaa;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .rage-entry .field-group input {
+            flex: 1;
+            background: #1a1a2e;
+            border: 1px solid #3a4a5a;
+            border-radius: 4px;
+            padding: 4px 6px;
+            color: #fff;
+            font-size: 0.8rem;
+            appearance: none;
+            min-width: 40px;
+            font-weight: 500;
+        }
+        .rage-entry .field-group .rage-help-btn {
+            background: #3a4a6a;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 20px;
+            text-align: center;
+            flex-shrink: 0;
+            transition: 0.2s;
+        }
+        .rage-entry .field-group .rage-help-btn:hover {
+            background: #e67e22;
+        }
 
         #outputArea {
             background: #0a0a1a;
@@ -1204,11 +1274,12 @@ function createDefaultEnemy() {
             deadlyPoison: 9999, erosion: 9999
         },
         enemyAIList: [],
-        isBoss: false
+        isBoss: false,
+        rageDataList: []  // 新增
     };
 }
 
-// ============= 构建统一的枚举输入组件（支持 path 用于焦点恢复） =============
+// ============= 构建统一的枚举输入组件 =============
 function buildEnumInput(value, fieldName, dataAttrs, extraClass = '', enumKey = null, path = '') {
     let key = enumKey;
     if (!key) {
@@ -1520,8 +1591,14 @@ function showHelpModal(fieldName, value, helpText) {
     const modal = document.getElementById('helpModal');
     const title = document.getElementById('helpTitle');
     const content = document.getElementById('helpContent');
-    title.textContent = `${fieldName} - 值 ${value} 的详细说明`;
-    content.textContent = helpText;
+    if (value === '' || value === undefined) {
+        // 纯帮助模式（用于rage等）
+        title.textContent = fieldName;
+        content.textContent = helpText;
+    } else {
+        title.textContent = `${fieldName} - 值 ${value} 的详细说明`;
+        content.textContent = helpText;
+    }
     modal.classList.add('active');
 }
 
@@ -1633,7 +1710,7 @@ function serializeConditionValue(type, parts) {
     return parts.value || '';
 }
 
-// ============= 构建条件值输入框 HTML（标签精准化） =============
+// ============= 构建条件值输入框 HTML =============
 function buildConditionValueInputs(cond, ci, ai, idx) {
     const type = parseInt(cond.conditionType);
     const parts = getConditionParts(type, cond.conditionValue);
@@ -1661,11 +1738,9 @@ function buildConditionValueInputs(cond, ci, ai, idx) {
             html += `<div class="cond-part"><label>${labels[i]}</label><input type="number" class="short" data-part="${k}" value="${parts[k]||0}" ${baseAttrs} data-path="${pathPrefix}-${k}" /></div>`;
         });
     } else if (type >= 121 && type <= 127) {
-        // 特定角色卡
         html += `<div class="cond-part"><label>卡片id</label><input type="text" class="medium" data-part="id" value="${parts.id||0}" ${baseAttrs} data-path="${pathPrefix}-id" /></div>`;
         html += `<div class="cond-part"><label>限制数量</label><input type="number" class="short" data-part="countVal" value="${parts.countVal||0}" ${baseAttrs} data-path="${pathPrefix}-count" /></div>`;
     } else if (type >= 131 && type <= 137) {
-        // 角色组
         html += `<div class="cond-part"><label>角色组id</label><input type="text" class="medium" data-part="id" value="${parts.id||0}" ${baseAttrs} data-path="${pathPrefix}-id" /></div>`;
         html += `<div class="cond-part"><label>限制数量</label><input type="number" class="short" data-part="countVal" value="${parts.countVal||0}" ${baseAttrs} data-path="${pathPrefix}-count" /></div>`;
     } else if (type === 141) {
@@ -1752,7 +1827,6 @@ function buildActionHTML(action, type, idx1, idx2, enemyIdx) {
                     }
                 }
                 if (isEnum) {
-                    // 生成唯一路径用于焦点恢复
                     const path = isAbility ? `enemy-${enemyIdx}-ability-${ai}-action-${ai2}-${fKey}` : `enemy-${enemyIdx}-skill-${si}-action-${ai}-${fKey}`;
                     return `
                         <div class="field-group">
@@ -1806,7 +1880,7 @@ function buildActionHTML(action, type, idx1, idx2, enemyIdx) {
     `;
 }
 
-// ============= 渲染敌人列表（带焦点恢复） =============
+// ============= 渲染敌人列表 =============
 function renderEnemies() {
     // 记录当前焦点元素路径
     const activeEl = document.activeElement;
@@ -1883,12 +1957,77 @@ function renderEnemies() {
             const field = el.dataset.field;
             if (field) {
                 el.addEventListener('change', () => updateEnemyField(idx, field, el));
-                const structuralFields = ['targetType', 'effectConditionType', 'triggerType', 'conditionType', 'actionType', 'armorregister_', 'skill', 'ab'];
+                const structuralFields = ['targetType', 'effectConditionType', 'triggerType', 'conditionType', 'actionType', 'armorregister_', 'skill', 'ab', 'isBoss'];
                 const isStructural = structuralFields.some(sf => field.includes(sf));
                 if (!isStructural) {
                     el.addEventListener('input', () => updateEnemyField(idx, field, el));
                 }
             }
+        });
+
+        // 绑定 rage 帮助按钮
+        body.querySelectorAll('.rage-help-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const label = this.dataset.label;
+                const help = this.dataset.help;
+                if (label && help) {
+                    showHelpModal(label, '', help);
+                }
+            });
+        });
+
+        // 绑定 rage 添加/删除
+        body.querySelector('.add-rage-btn')?.addEventListener('click', function() {
+            const enemy = enemies[idx];
+            if (!enemy.rageDataList) enemy.rageDataList = [];
+            enemy.rageDataList.push({
+                bossId: 0,
+                rageFrom: 0,
+                rageTo: 0,
+                rageAtk: 100,
+                rageDef: 100,
+                rageSkillIndex: 0,
+                beatId: 0,
+                rageAnimId: 0,
+                gaugeColorId: 0
+            });
+            renderEnemies();
+        });
+
+        // 绑定 rage 删除（事件委托）
+        body.querySelectorAll('.rage-entry .remove-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const idx = parseInt(this.dataset.rageIdx);
+                const enemy = enemies[idx];
+                if (enemy && enemy.rageDataList) {
+                    const rageIdx = parseInt(this.dataset.rageIndex);
+                    if (!isNaN(rageIdx)) {
+                        enemy.rageDataList.splice(rageIdx, 1);
+                        renderEnemies();
+                    }
+                }
+            });
+        });
+
+        // 绑定 rage 输入事件
+        body.querySelectorAll('.rage-entry input[data-rage-field]').forEach(el => {
+            el.addEventListener('input', function() {
+                const enemyIdx = parseInt(this.dataset.enemyIdx);
+                const rageIdx = parseInt(this.dataset.rageIndex);
+                const field = this.dataset.rageField;
+                const enemy = enemies[enemyIdx];
+                if (!enemy || !enemy.rageDataList || !enemy.rageDataList[rageIdx]) return;
+                const val = this.value;
+                const numVal = parseFloat(val);
+                if (!isNaN(numVal)) {
+                    enemy.rageDataList[rageIdx][field] = numVal;
+                } else {
+                    enemy.rageDataList[rageIdx][field] = 0;
+                }
+                updatePreview();
+            });
         });
 
         body.querySelectorAll('.fold-header').forEach(fh => {
@@ -1948,7 +2087,6 @@ function renderEnemies() {
         const target = document.querySelector(`[data-path="${focusPath}"]`);
         if (target) {
             target.focus();
-            // 滚动到可见区域
             target.scrollIntoView({ block: 'center', behavior: 'smooth' });
         }
     }
@@ -1996,6 +2134,7 @@ function buildEnemyFormHTML(enemy, idx) {
                 <div class="row">
                     <div class="field-group"><label>是否为Boss</label><input type="checkbox" ${enemy.isBoss?'checked':''} data-field="isBoss" style="width:20px;flex:0;" /></div>
                 </div>
+                ${enemy.isBoss ? buildRageHTML(enemy, idx) : ''}
             </div>
         </div>
     `;
@@ -2207,6 +2346,71 @@ function buildEnemyFormHTML(enemy, idx) {
     return html;
 }
 
+// ============= 构建狂暴数据 HTML =============
+function buildRageHTML(enemy, idx) {
+    const rageList = enemy.rageDataList || [];
+    let html = `
+        <div class="fold-group" style="margin-top:10px;">
+            <div class="fold-header" data-target="rageList_${idx}">
+                <span class="label">💢 狂暴数据 (Rage) — ${rageList.length} 个阶段</span>
+                <span class="text-muted">点击折叠</span>
+            </div>
+            <div class="fold-body" id="rageList_${idx}">
+                <button class="btn btn-sm btn-success add-rage-btn" style="margin-bottom:10px;">+ 添加狂暴阶段</button>
+    `;
+    if (rageList.length === 0) {
+        html += `<div style="color:#666; font-style:italic; padding:8px 0;">暂无狂暴阶段</div>`;
+    } else {
+        rageList.forEach((rage, ri) => {
+            html += `
+                <div class="rage-entry" data-rage-index="${ri}">
+                    <button class="remove-btn" data-rage-index="${ri}" data-enemy-idx="${idx}">×</button>
+                    <div class="flex-row" style="gap:8px;">
+                        <div class="field-group">
+                            <label>Boss ID</label>
+                            <input type="number" value="${rage.bossId || 0}" data-rage-field="bossId" data-rage-index="${ri}" data-enemy-idx="${idx}" />
+                            <button type="button" class="rage-help-btn" data-label="Boss ID" data-help="Boss 的唯一标识 ID">?</button>
+                        </div>
+                        <div class="field-group">
+                            <label>退出狂暴血量</label>
+                            <input type="number" value="${rage.rageFrom || 0}" data-rage-field="rageFrom" data-rage-index="${ri}" data-enemy-idx="${idx}" />
+                            <button type="button" class="rage-help-btn" data-label="退出狂暴血量" data-help="填入低于该血量时退出狂暴">?</button>
+                        </div>
+                        <div class="field-group">
+                            <label>触发狂暴血量</label>
+                            <input type="number" value="${rage.rageTo || 0}" data-rage-field="rageTo" data-rage-index="${ri}" data-enemy-idx="${idx}" />
+                            <button type="button" class="rage-help-btn" data-label="触发狂暴血量" data-help="填入低于该血量时触发狂暴">?</button>
+                        </div>
+                    </div>
+                    <div class="flex-row" style="gap:8px;">
+                        <div class="field-group">
+                            <label>狂暴攻击力</label>
+                            <input type="number" value="${rage.rageAtk || 100}" data-rage-field="rageAtk" data-rage-index="${ri}" data-enemy-idx="${idx}" />
+                            <button type="button" class="rage-help-btn" data-label="狂暴攻击力" data-help="填入150为攻击变为1.5倍">?</button>
+                        </div>
+                        <div class="field-group">
+                            <label>狂暴防御力</label>
+                            <input type="number" value="${rage.rageDef || 100}" data-rage-field="rageDef" data-rage-index="${ri}" data-enemy-idx="${idx}" />
+                            <button type="button" class="rage-help-btn" data-label="狂暴防御力" data-help="填入150为防御变为1.5倍">?</button>
+                        </div>
+                        <div class="field-group">
+                            <label>狂暴skillid</label>
+                            <input type="number" value="${rage.rageSkillIndex || 0}" data-rage-field="rageSkillIndex" data-rage-index="${ri}" data-enemy-idx="${idx}" />
+                            <button type="button" class="rage-help-btn" data-label="狂暴skillid" data-help="填入狂暴时使用的skill的id。填0则随机使用">?</button>
+                        </div>
+                    </div>
+                    <!-- 隐藏字段（默认值） -->
+                    <input type="hidden" data-rage-field="beatId" value="${rage.beatId || 0}" />
+                    <input type="hidden" data-rage-field="rageAnimId" value="${rage.rageAnimId || 0}" />
+                    <input type="hidden" data-rage-field="gaugeColorId" value="${rage.gaugeColorId || 0}" />
+                </div>
+            `;
+        });
+    }
+    html += `</div></div>`;
+    return html;
+}
+
 // ============= 绑定子列表 =============
 function bindSubAddButtons(body, enemyIdx) {
     body.querySelectorAll('.add-skill-action').forEach(btn => {
@@ -2369,7 +2573,7 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// ============= 更新字段（优化：只有结构性变化才重建） =============
+// ============= 更新字段 =============
 function updateEnemyField(enemyIdx, field, el) {
     const enemy = enemies[enemyIdx];
     let val = el.value;
@@ -2446,12 +2650,19 @@ function updateEnemyField(enemyIdx, field, el) {
     }
 
     // ---- 简单字段（非结构性） ----
-    const simpleFields = ['name', 'attribute', 'subAttribute', 'hp', 'atk', 'def', 'armorHp', 'addArmorHp', 'unisonAddDamage', 'beatlimit', 'isBoss'];
+    const simpleFields = ['name', 'attribute', 'subAttribute', 'hp', 'atk', 'def', 'armorHp', 'addArmorHp', 'unisonAddDamage', 'beatlimit'];
     if (simpleFields.includes(field)) {
-        if (field === 'isBoss') enemy.isBoss = val;
-        else if (field === 'attribute' || field === 'subAttribute') enemy[field] = parseInt(val);
+        if (field === 'attribute' || field === 'subAttribute') enemy[field] = parseInt(val);
         else if (['hp','atk','def','armorHp','addArmorHp','unisonAddDamage','beatlimit'].includes(field)) enemy[field] = parseFloat(val) || 0;
         else enemy[field] = val;
+        updatePreview();
+        return;
+    }
+
+    // ---- isBoss（结构性） ----
+    if (field === 'isBoss') {
+        enemy.isBoss = val;
+        renderEnemies();
         updatePreview();
         return;
     }
@@ -2620,6 +2831,7 @@ function buildFullData() {
             deadlyPoison: e.resist.deadlyPoison!==undefined?e.resist.deadlyPoison:0, erosion: e.resist.erosion||0
         };
         e.enemyAIList = enemy.enemyAIList.map(ai => ({ ...ai }));
+        e.rageDataList = enemy.rageDataList || [];
         return e;
     });
 
@@ -2684,7 +2896,7 @@ document.getElementById('exportBtn').addEventListener('click', () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `BossDIY.json`;
+    a.download = `boss_${data.stageId}.json`;
     a.click();
     URL.revokeObjectURL(url);
 });
@@ -2721,6 +2933,7 @@ document.getElementById('fileInput').addEventListener('change', (e) => {
                                 if (s.effectShowType === undefined || s.effectShowType === null) s.effectShowType = null;
                             });
                         }
+                        if (!e.rageDataList) e.rageDataList = [];
                         return e;
                     });
                     let maxId = 0;
@@ -2779,7 +2992,8 @@ function initDemo() {
             deadlyPoison:9999, erosion:9999
         },
         enemyAIList: [],
-        isBoss: false
+        isBoss: false,
+        rageDataList: []
     };
     enemies.push(demo);
     enemyIdCounter = 2006;
