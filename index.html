@@ -2106,7 +2106,7 @@ function buildEnemyFormHTML(enemy, idx) {
             <div class="fold-header" data-target="basicParams_${idx}"><span class="label">📊 基本参数</span><span class="text-muted">点击折叠</span></div>
             <div class="fold-body" id="basicParams_${idx}">
                 <div class="row">
-                    <div class="field-group"><label>${FIELD_LABELS.enemyId}</label><input type="number" value="${enemy.enemyId}" data-field="enemyId" disabled /></div>
+                    <div class="field-group"><label>${FIELD_LABELS.enemyId}</label><input type="number" value="${enemy.enemyId}" data-field="enemyId" /></div>
                     <div class="field-group"><label>${FIELD_LABELS.name}</label><input type="text" value="${enemy.name}" data-field="name" /></div>
                     <div class="field-group"><label>${FIELD_LABELS.attribute}</label><select data-field="attribute">${attrOptions}</select></div>
                     <div class="field-group"><label>${FIELD_LABELS.subAttribute}</label><select data-field="subAttribute">${subAttrOptions}</select></div>
