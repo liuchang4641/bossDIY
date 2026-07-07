@@ -2684,7 +2684,7 @@ document.getElementById('exportBtn').addEventListener('click', () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `boss_${data.stageId}.json`;
+    a.download = `BossDIY.json`;
     a.click();
     URL.revokeObjectURL(url);
 });
