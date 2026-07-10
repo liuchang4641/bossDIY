@@ -1882,13 +1882,26 @@
             if (t === 11) {
                 return { count: 1, buffId: v };
             }
-            if (t >= 101 && t <= 112) {
-                const match = v.match(/^\(([^)]+)\)$/);
-                let vals = match ? match[1].split(',') : ['', '', '', '', '', ''];
-                while (vals.length < 6) vals.push('');
-                return { count: 6, fire: vals[0], water: vals[1], wind: vals[2], thunder: vals[3], light: vals[4],
-                    dark: vals[5] };
-            }
+if (t >= 101 && t <= 112) {
+    let vals = [];
+    // 兼容旧数据：先尝试去除括号，再按逗号拆分
+    const match = v.match(/^\(([^)]+)\)$/);
+    if (match) {
+        vals = match[1].split(',');
+    } else {
+        vals = v.split(',');
+    }
+    while (vals.length < 6) vals.push('');
+    return {
+        count: 6,
+        fire: vals[0] || '',
+        water: vals[1] || '',
+        wind: vals[2] || '',
+        thunder: vals[3] || '',
+        light: vals[4] || '',
+        dark: vals[5] || ''
+    };
+}
             if ((t >= 121 && t <= 127) || (t >= 131 && t <= 137)) {
                 const arr = v.split(':');
                 return { count: 2, id: arr[0] || '', countVal: arr[1] || '' };
@@ -1917,9 +1930,9 @@
             if (t === 11) {
                 return parts.buffId || '0';
             }
-            if (t >= 101 && t <= 112) {
-                return `(${parts.fire||0},${parts.water||0},${parts.wind||0},${parts.thunder||0},${parts.light||0},${parts.dark||0})`;
-            }
+if (t >= 101 && t <= 112) {
+    return `${parts.fire||0},${parts.water||0},${parts.wind||0},${parts.thunder||0},${parts.light||0},${parts.dark||0}`;
+}
             if ((t >= 121 && t <= 127) || (t >= 131 && t <= 137)) {
                 return `${parts.id || 0}:${parts.countVal || 0}`;
             }
